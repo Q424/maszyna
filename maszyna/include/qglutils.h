@@ -250,45 +250,48 @@ inline void EN_FRAMEBUFFERSRGB(bool state)
 
 inline void Draw_SCENE000(double sx, double sy, double sz)
 {
-	GLboolean blendEnabled;
-	GLint blendSrc;
-	GLint blendDst;
-	glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
-	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
-	glDisable(GL_TEXTURE_2D); // Enable Texture Mapping
-	glEnable(GL_BLEND);
+	if (Global::bDrawXYGrid)
+	{
+		GLboolean blendEnabled;
+		GLint blendSrc;
+		GLint blendDst;
+		glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
+		glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
+		glDisable(GL_TEXTURE_2D); // Enable Texture Mapping
+		glEnable(GL_BLEND);
 
-	glDisable(GL_LIGHTING);
-	glLineWidth(0.8);
-	glColor4f(0.9, 0.2, 0.2, 0.1);
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 10, 0);
-	glVertex3f(0, 0, 0);
-	glEnd();
-	glColor4f(0.4, 0.9, 0.4, 0.1);
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(1000, 0, 0);
-	glVertex3f(0, 0, 0);
-	glEnd();
+		glDisable(GL_LIGHTING);
+		glLineWidth(0.8);
+		glColor4f(0.9, 0.2, 0.2, 0.1);
+		glBegin(GL_LINE_STRIP);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 10, 0);
+		glVertex3f(0, 0, 0);
+		glEnd();
+		glColor4f(0.4, 0.9, 0.4, 0.1);
+		glBegin(GL_LINE_STRIP);
+		glVertex3f(0, 0, 0);
+		glVertex3f(1000, 0, 0);
+		glVertex3f(0, 0, 0);
+		glEnd();
 
-	glColor4f(0.4, 0.4, 0.9, 0.1);
-	glBegin(GL_LINE_STRIP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 0, -1000);
-	glVertex3f(0, 0, 0);
-	glEnd();
+		glColor4f(0.4, 0.4, 0.9, 0.1);
+		glBegin(GL_LINE_STRIP);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, -1000);
+		glVertex3f(0, 0, 0);
+		glEnd();
 
-	glPushMatrix();
-	glTranslatef(0, 0, 0);
-	//glutSolidSphere(0.3, 12, 12);
-	glPopMatrix();
+		glPushMatrix();
+		glTranslatef(0, 0, 0);
+		//glutSolidSphere(0.3, 12, 12);
+		glPopMatrix();
 
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
-	glBlendFunc(blendSrc, blendDst);
-	glDisable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_LIGHTING);
+		glBlendFunc(blendSrc, blendDst);
+		glDisable(GL_BLEND);
+	}
 }
 
 
@@ -298,68 +301,71 @@ inline void Draw_SCENE000(double sx, double sy, double sz)
 
 inline bool DRAW_XYGRID()
 {
-	float cxx = Global::pCameraPosition.x;
-	float czz = Global::pCameraPosition.z;
-	cxx = ceil(Global::pCameraPosition.x / 10) * 10;
-	czz = ceil(Global::pCameraPosition.z / 10) * 10;
-
-
-	glEnable(GL_LINE_SMOOTH);
-	// glHint( GL_LINE_SMOOTH_HINT, GL_DONT_CARE );
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // PRO BLEND
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_TEXTURE_2D); // Enable Texture Mapping
-	glDisable(GL_LIGHTING);
-	glEnable(GL_BLEND);
-
-	// if (Global::bGRIDPROAAA) glEnable(GL_BLEND);
-	//glDisable(GL_COLOR_MATERIAL);
-	glLineWidth(0.02);
-	glPushMatrix();
-	glTranslatef(cxx, 0, czz);
-
-	// if (!CBGRIDDT) glDisable(GL_DEPTH_TEST);
-	// if (CBGRIDBLEND)
-	
-
-
-
-	glLineWidth(0.01);
-	glColor4f(0.2, 0.2, 0.2, 0.5f);
-	int bound = 100;
-	for (float i = -bound; i <= bound; i += 1)
+	if (Global::bDrawXYGrid)
 	{
-		glBegin(GL_LINES);
-		glVertex3f(-bound, 0, i);
-		glVertex3f(bound, 0, i);
-		glVertex3f(i, 0, -bound);
-		glVertex3f(i, 0, bound);
-		glEnd();
+		float cxx = Global::pCameraPosition.x;
+		float czz = Global::pCameraPosition.z;
+		cxx = ceil(Global::pCameraPosition.x / 10) * 10;
+		czz = ceil(Global::pCameraPosition.z / 10) * 10;
+
+
+		glEnable(GL_LINE_SMOOTH);
+		// glHint( GL_LINE_SMOOTH_HINT, GL_DONT_CARE );
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // PRO BLEND
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_TEXTURE_2D); // Enable Texture Mapping
+		glDisable(GL_LIGHTING);
+		glEnable(GL_BLEND);
+
+		// if (Global::bGRIDPROAAA) glEnable(GL_BLEND);
+		//glDisable(GL_COLOR_MATERIAL);
+		glLineWidth(0.02);
+		glPushMatrix();
+		glTranslatef(cxx, 0, czz);
+
+		// if (!CBGRIDDT) glDisable(GL_DEPTH_TEST);
+		// if (CBGRIDBLEND)
+
+
+
+
+		glLineWidth(0.01);
+		glColor4f(0.2, 0.2, 0.2, 0.5f);
+		int bound = 100;
+		for (float i = -bound; i <= bound; i += 1)
+		{
+			glBegin(GL_LINES);
+			glVertex3f(-bound, 0, i);
+			glVertex3f(bound, 0, i);
+			glVertex3f(i, 0, -bound);
+			glVertex3f(i, 0, bound);
+			glEnd();
+		}
+		glColor4f(0.3, 0.3, 0.3, 0.7f);
+		glLineWidth(0.5);
+		bound = 100;
+		for (float i = -bound; i <= bound; i += 10)
+		{
+			glBegin(GL_LINES);
+			glVertex3f(-bound, 0, i);
+			glVertex3f(bound, 0, i);
+			glVertex3f(i, 0, -bound);
+			glVertex3f(i, 0, bound);
+			glEnd();
+		}
+
+		glPopMatrix();
+
+		glEnable(GL_LIGHTING);
+		glEnable(GL_COLOR_MATERIAL);
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D); // Enable Texture Mapping
+
+		//if (Global::isFOGON) glEnable(GL_FOG);
+		return true;
 	}
-	glColor4f(0.3, 0.3, 0.3, 0.7f);
-	glLineWidth(0.5);
-	bound = 100;
-	for (float i = -bound; i <= bound; i += 10)
-	{
-		glBegin(GL_LINES);
-		glVertex3f(-bound, 0, i);
-		glVertex3f(bound, 0, i);
-		glVertex3f(i, 0, -bound);
-		glVertex3f(i, 0, bound);
-		glEnd();
-	}
-
-	glPopMatrix();
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D); // Enable Texture Mapping
-
-	//if (Global::isFOGON) glEnable(GL_FOG);
-	return true;
 }
 
 

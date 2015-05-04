@@ -149,6 +149,7 @@ private:
  int iName; //numer ³añcucha z nazw¹ submodelu, albo -1 gdy anonimowy
 public: //chwilowo
  TAnimType b_Anim;
+ GLuint TextureID; //numer tekstury, -1 wymienna, 0 brak
 private:
  int iFlags; //flagi informacyjne:
  //bit  0: =1 faza rysowania zale¿y od wymiennej tekstury 0
@@ -191,7 +192,7 @@ private:
  float fCosHotspotAngle; //cosinus k¹ta sto¿ka pod którym widaæ aureolê i zwiêkszone natê¿enie œwiat³a
  float fCosViewAngle;    //cos kata pod jakim sie teraz patrzy
  //Ra: dalej s¹ zmienne robocze, mo¿na je przestawiaæ z zachowaniem rozmiaru klasy
- int TextureID; //numer tekstury, -1 wymienna, 0 brak
+ 
  int bWire; //nie u¿ywane, ale wczytywane
  //short TexAlpha;  //Ra: nie u¿ywane ju¿
  GLuint uiDisplayList; //roboczy numer listy wyœwietlania
@@ -215,7 +216,7 @@ public:
  TSubModel *Parent; //nadrzêdny, np. do wymna¿ania macierzy
  int iVisible; //roboczy stan widocznoœci
  //std::string asTexture; //robocza nazwa tekstury do zapisania w pliku binarnym
- //std::string asName; //robocza nazwa
+ std::string asName; //robocza nazwa
  char *pTexture; //robocza nazwa tekstury do zapisania w pliku binarnym
  char *pName; //robocza nazwa
 private:
@@ -247,8 +248,9 @@ public:
  void SetTranslate(vector3 vNewTransVector);
  void SetTranslate(float3 vNewTransVector);
  void SetRotateIK1(float3 vNewAngles);
- TSubModel* GetFromName(std::string search,bool i=true);
- TSubModel* GetFromName(char *search,bool i=true);
+ //TSubModel* GetFromName(std::string search,bool i=true);
+ //TSubModel* GetFromName(char *search,bool i=true);
+ TSubModel* GetFromName(std::string search);
  void RenderDL();
  void RenderAlphaDL();
  void RenderVBO();
@@ -339,7 +341,7 @@ public:
  void LoadFromBinFile(char *FileName,bool dynamic);
  bool LoadFromFile(std::string FileName,bool dynamic);
  void SaveToBinFile(char *FileName);
- void BreakHierarhy();
+
  //renderowanie specjalne
  void Render(double fSquareDistance,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
  void RenderAlpha(double fSquareDistance,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
@@ -351,10 +353,10 @@ public:
  void RaRender(vector3 pPosition,double fAngle=0,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
  void RaRenderAlpha(vector3 pPosition,double fAngle=0,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
  //trzy k¹ty obrotu
- void Render(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
- void RenderAlpha(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
- void RaRender(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
- void RaRenderAlpha(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
+ void Render3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
+ void RenderAlpha3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
+ void RaRender3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
+ void RaRenderAlpha3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId=NULL,int iAlpha=0x30300030);
  //inline int GetSubModelsCount() { return (SubModelsCount); };
  int Flags() {return iFlags;};
  void Init();

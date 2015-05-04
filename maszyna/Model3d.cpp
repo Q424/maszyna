@@ -16,6 +16,7 @@
 //#include "mtable.hpp"
 //---------------------------------------------------------------------------
 
+bool debug_modelload = false;
 
 double TSubModel::fSquareDist=0;
 int TSubModel::iInstance; //numer renderowanego egzemplarza obiektu
@@ -223,43 +224,53 @@ inline void readMatrix(cParser& parser,float4x4& matrix)
    parser.getToken(matrix(x)[y]);
 };
 
+
+
+// *****************************************************************************************************************************
 int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
 {//Ra: VBO tworzone na poziomie modelu, a nie submodeli
  iNumVerts=0;
  iVboPtr=Pos; //pozycja w VBO
- //TMaterialColorf Ambient,Diffuse,Specular;
- //GLuint TextureID;
- //char *extName;
+ std::string token;
+
  if (!parser.expectToken("type:"))
   WriteLogSS("Model type parse failure!", "ERROR");
- {
+
   std::string type;
   parser.getToken(type);
+  if (debug_modelload) WriteLogSS("TYPE:", type);
+
   if (type=="mesh")
    eType=GL_TRIANGLES; //submodel - trójkaty
-  else if (type=="point")
+  else if (type == "point")
    eType=GL_POINTS; //co to niby jest?
-  else if (type=="freespotlight")
+  else if (type == "freespotlight")
    eType=TP_FREESPOTLIGHT; //œwiate³ko
-  else if (type=="text")
+  else if (type == "text")
    eType=TP_TEXT; //wyœwietlacz tekstowy (generator napisów)
-  else if (type=="stars")
+  else if (type == "stars")
    eType=TP_STARS; //wiele punktów œwietlnych
- };
+
+
  parser.ignoreToken();
- std::string token;
+
  //parser.getToken(token1); //ze zmian¹ na ma³e!
  parser.getTokens(1,false); //nazwa submodelu bez zmieny na ma³e
  parser >> token;
  NameSet(token.c_str());
+ if (debug_modelload) WriteLogSS("NAME:", token);
+
+ asName = ToLowerCase(std::string(token));
+
+
  if (dynamic)
  {//dla pojazdu, blokujemy za³¹czone submodele, które mog¹ byæ nieobs³ugiwane
-  if (token.find("_on")+3==token.length()) //jeœli nazwa koñczy siê na "_on"
+  if (token.find("_on") + 3 == token.length()) //jeœli nazwa koñczy siê na "_on"
    iVisible=0; //to domyœlnie wy³¹czyæ, ¿eby siê nie nak³ada³o z obiektem "_off"
  }
  else //dla pozosta³ych modeli blokujemy zapalone œwiat³a, które mog¹ byæ nieobs³ugiwane
-  if (token.find("Light_On")==0) //jeœli nazwa zaczyna siê od "Light_On"
-   iVisible=0; //to domyœlnie wy³¹czyæ, ¿eby siê nie nak³ada³o z obiektem "Light_Off"
+  if (token.find("Light_On") == 0) //jeœli nazwa zaczyna siê od "Light_On"
+   iVisible = 0; //to domyœlnie wy³¹czyæ, ¿eby siê nie nak³ada³o z obiektem "Light_Off"
 
  if (parser.expectToken("anim:")) //Ra: ta informacja by siê przyda³a!
  {//rodzaj animacji
@@ -336,6 +347,8 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
    WriteLogSS("Model map parse failure!", "ERROR");
   std::string texture;
   parser.getToken(texture);
+
+
   if (texture=="none")
   {//rysowanie podanym kolorem
    TextureID=0;
@@ -343,9 +356,11 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
   }
   else if (texture.find("replacableskin")!=texture.npos)
   {// McZapkie-060702: zmienialne skory modelu
-   TextureID=-1;
+   WriteLog("REPLACABLESKIN");
+   TextureID = -1;
    iFlags|=(Opacity<1.0)?1:0x10; //zmienna tekstura 1
   }
+  /*
   else if (texture=="-1")
   {
    TextureID=-1;
@@ -366,17 +381,21 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
    TextureID=-4;
    iFlags|=(Opacity<1.0)?8:0x10; //zmienna tekstura 4
   }
+  */
   else
   {//jeœli tylko nazwa pliku, to dawaæ bie¿¹c¹ œcie¿kê do tekstur
    //asTexture=std::string(texture.c_str()); //zapamiêtanie nazwy tekstury
-   TextureNameSet(texture.c_str());
+   //--TextureNameSet(texture.c_str());
+
    if (texture.find_first_of("/\\")==texture.npos)
     texture.insert(0,Global::asCurrentTexturePath.c_str());
-//-   TextureID=TTexturesManager::GetTextureID(szTexturePath,Global::asCurrentTexturePath.c_str(),texture);
-   //TexAlpha=TTexturesManager::GetAlpha(TextureID);
-   //iFlags|=TexAlpha?0x20:0x10; //0x10-nieprzezroczysta, 0x20-przezroczysta
-   if (Opacity<1.0) //przezroczystoœæ z tekstury brana tylko dla Opacity 0!
-    iFlags|=TTexturesManager::GetAlpha(TextureID)?0x20:0x10; //0x10-nieprzezroczysta, 0x20-przezroczysta
+
+   //WriteLogSS("TEXTURE:", texture);
+   //TextureID=TTexturesManager::GetTextureID(szTexturePath,Global::asCurrentTexturePath.c_str(),texture);
+   TextureID =  TTexturesManager::GetTextureID(stdstrtochar(texture), false);
+
+   if (Opacity==1.0) //przezroczystoœæ z tekstury brana tylko dla Opacity 0!
+   iFlags|=TTexturesManager::GetAlpha(TextureID)?0x20:0x10; //0x10-nieprzezroczysta, 0x20-przezroczysta
    else
     iFlags|=0x10; //normalnie nieprzezroczyste
    //renderowanie w cyklu przezroczystych tylko jeœli:
@@ -385,17 +404,21 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
   };
  }
  else iFlags|=0x10;
+
  parser.ignoreToken();
  parser.getToken(fSquareMaxDist);
  if (fSquareMaxDist>=0.0)
   fSquareMaxDist*=fSquareMaxDist;
  else
   fSquareMaxDist=10000*10000; //10km
+
  parser.ignoreToken();
  parser.getToken(fSquareMinDist);
  fSquareMinDist*=fSquareMinDist;
  parser.ignoreToken();
+
  fMatrix=new float4x4();
+
  readMatrix(parser,*fMatrix); //wczytanie transform
  if (!fMatrix->IdentityIs())
   iFlags|=0x8000; //transform niejedynkowy - trzeba go przechowaæ
@@ -411,6 +434,7 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
    WriteLogSS("Mesh error, (iNumVertices= iNumVerts)%3!=0", "ERROR");
    return 0;
   }
+
   //Vertices=new GLVERTEX[iNumVerts];
   if (iNumVerts)
   {Vertices=new float8[iNumVerts];
@@ -460,6 +484,7 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
       }
     }
    }
+
    int i; //indeks dla trójk¹tów
    float3 *n=new float3[iNumFaces]; //tablica wektorów normalnych dla trójk¹tów
    for (i=0;i<iNumFaces;i++) //pêtla po trójk¹tach - bêdzie szybciej, jak wstêpnie przeliczymy normalne trójk¹tów
@@ -485,6 +510,7 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
      Vertices[v].Normal=SafeNormalize(norm); //przepisanie do wierzcho³ka trójk¹ta
     }
    }
+ 
    delete[] wsp;
    delete[] n;
    delete[] sg;
@@ -493,6 +519,7 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
   {eType=TP_ROTATOR; //submodel pomocniczy, ma tylko macierz przekszta³cenia
    iVboPtr=iNumVerts=0; //dla formalnoœci
   }
+
  }
  else if (eType==TP_STARS)
  {//punkty œwiec¹ce dookólnie - sk³adnia jak dla smt_Mesh
@@ -515,10 +542,14 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
    Vertices[i].Normal.z=((j>>16)&0xFF)/255.0; //B
   }
  }
+
  //Visible=true; //siê potem wy³¹czy w razie potrzeby
  //iFlags|=0x0200; //wczytano z pliku tekstowego (jest w³aœcicielem tablic)
  if (iNumVerts<1) iFlags&=~0x3F; //cykl renderowania uzale¿niony od potomnych
+
+ //WriteLogSS("iNumVerts:", itoss(iNumVerts));
  return iNumVerts; //do okreœlenia wielkoœci VBO
+
 };
 
 int TSubModel::TriangleAdd(TModel3d *m,int tex,int tri)
@@ -598,11 +629,7 @@ void TSubModel::DisplayLists()
    glBegin(eType);
    for (int i=0;i<iNumVerts;i++)
    {
-/*
-    glNormal3dv(&Vertices[i].Normal.x);
-    glTexCoord2f(Vertices[i].tu,Vertices[i].tv);
-    glVertex3dv(&Vertices[i].Point.x);
-*/
+
     glNormal3fv(&Vertices[i].Normal.x);
     glTexCoord2f(Vertices[i].tu,Vertices[i].tv);
     glVertex3fv(&Vertices[i].Point.x);
@@ -628,7 +655,7 @@ void TSubModel::DisplayLists()
   glColorMaterial(GL_FRONT,GL_EMISSION);
   glDisable(GL_LIGHTING);  //Tolaris-030603: bo mu punkty swiecace sie blendowaly
   glBegin(GL_POINTS);
-   glVertex3f(0,0,0);
+  glVertex3f(0,0,0);
   glEnd();
   glEnable(GL_LIGHTING);
   glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
@@ -820,35 +847,28 @@ struct ToLower
  char operator()(char input) { return tolower(input); }
 };
 
-TSubModel* TSubModel::GetFromName(std::string search,bool i)
+
+
+TSubModel* TSubModel::GetFromName(std::string search)
 {
- return GetFromName(search.c_str(),i);
+	TSubModel* result;
+	//std::transform(search.begin(),search.end(),search.begin(),ToLower());
+	search = ToLowerCase(search); // search.LowerCase();
+	
+	if (search == asName) return this;
+	if (Next)
+	{
+		result = Next->GetFromName(search);
+		if (result) return result;
+	}
+	if (Child)
+	{
+		result = Child->GetFromName(search);
+		if (result) return result;
+	}
+	return NULL;
 };
 
-TSubModel* TSubModel::GetFromName(char *search,bool i)
-{
- TSubModel* result;
- //std::transform(search.begin(),search.end(),search.begin(),ToLower());
- //search=search.LowerCase();
- //std::string name=std::string();
- if (pName&&search)
-  if ((i?stricmp(pName,search):strcmp(pName,search))==0)
-   return this;
-  else
-   if (pName==search)
-    return this; //oba NULL
- if (Next)
- {
-  result=Next->GetFromName(search);
-  if (result) return result;
- }
- if (Child)
- {
-  result=Child->GetFromName(search);
-  if (result) return result;
- }
- return NULL;
-};
 
 //WORD hbIndices[18]={3,0,1,5,4,2,1,0,4,1,5,3,2,3,5,2,4,0};
 
@@ -927,8 +947,11 @@ void TSubModel::RaAnimation(TAnimType a)
 
 void TSubModel::RenderDL()
 {//g³ówna procedura renderowania przez DL
- if (iVisible && (fSquareDist>=fSquareMinDist) && (fSquareDist<fSquareMaxDist))
+//WriteLog("void TSubModel::RenderDL()");
+
+ //if (iVisible && (fSquareDist>=fSquareMinDist) && (fSquareDist<fSquareMaxDist))
  {
+
   if (iFlags&0xC000)
   {glPushMatrix();
    if (fMatrix)
@@ -937,15 +960,21 @@ void TSubModel::RenderDL()
   }
   if (eType<TP_ROTATOR)
   {//renderowanie obiektów OpenGL
+	 
+
    if (iAlpha&iFlags&0x1F)  //rysuj gdy element nieprzezroczysty
-   {if (TextureID<0) // && (ReplacableSkinId!=0))
+   {
+   if (TextureID<0) // && (ReplacableSkinId!=0))
     {//zmienialne skóry
      glBindTexture(GL_TEXTURE_2D,ReplacableSkinId[-TextureID]);
      //TexAlpha=!(iAlpha&1); //zmiana tylko w przypadku wymienej tekstury
     }
     else
      glBindTexture(GL_TEXTURE_2D,TextureID); //równie¿ 0
-    if (Global::fLuminance<fLight)
+   
+   //Draw_SCENE000(0, 0, 0);
+
+   if (Global::fLuminance<fLight)
     {glMaterialfv(GL_FRONT,GL_EMISSION,f4Diffuse);  //zeby swiecilo na kolorowo
      glCallList(uiDisplayList); //tylko dla siatki
      glMaterialfv(GL_FRONT,GL_EMISSION,emm2);
@@ -1012,14 +1041,18 @@ void TSubModel::RenderDL()
 
 void TSubModel::RenderAlphaDL()
 {//renderowanie przezroczystych przez DL
+//WriteLog("void TSubModel::RenderAlphaDL()");
+
  if (iVisible && (fSquareDist>=fSquareMinDist) && (fSquareDist<fSquareMaxDist))
  {
   if (iFlags&0xC000)
-  {glPushMatrix();
+  {
+	glPushMatrix();
    if (fMatrix)
     glMultMatrixf(fMatrix->readArray());
    if (b_aAnim) RaAnimation(b_aAnim);
   }
+
   if (eType<TP_ROTATOR)
   {//renderowanie obiektów OpenGL
    if (iAlpha&iFlags&0x2F)  //rysuj gdy element przezroczysty
@@ -1030,6 +1063,9 @@ void TSubModel::RenderAlphaDL()
     }
     else
      glBindTexture(GL_TEXTURE_2D,TextureID); //równie¿ 0
+
+   //Draw_SCENE000(0, 0, 0);
+
     if (Global::fLuminance<fLight)
     {glMaterialfv(GL_FRONT,GL_EMISSION,f4Diffuse);  //zeby swiecilo na kolorowo
      glCallList(uiDisplayList); //tylko dla siatki
@@ -1524,24 +1560,30 @@ TMaterial* TModel3d::GetMaterialFromName(char *sName)
 }
 */
 
-bool TModel3d::LoadFromFile(std::string FileName,bool dynamic)
+bool TModel3d::LoadFromFile(std::string FileName, bool dynamic)
 {//wczytanie modelu z pliku
- WriteLog("bool TModel3d::LoadFromFile(char *FileName,bool dynamic)");
+ if (Global::bLogFPHeaders) WriteLog("bool TModel3d::LoadFromFile(char *FileName, bool dynamic)");
 
- std::string name = std::string(FileName); // TODO: tolower
+ if (debug_modelload) WriteLogSS(FileName, "INFO");
+
+ std::string name = FileName; // TODO: tolower
  int i=name.find(".");
  if (i)
   if (name.substr(i,name.length()-i+1)==".t3d")
    name.erase(i,4);
  asBinary=name+".e3d";
  if (FileExists(asBinary))
- {LoadFromBinFile(stdstrtochar(asBinary), dynamic);
+ { 
+  
+  LoadFromBinFile(stdstrtochar(asBinary), dynamic);
   asBinary=""; //wy³¹czenie zapisu
   Init();
  }
  else
- {if (FileExists(name+".t3d"))
-  {LoadFromTextFile(FileName,dynamic); //wczytanie tekstowego
+ {
+ if (FileExists(name+".t3d"))
+  {
+   LoadFromTextFile(FileName, dynamic); //wczytanie tekstowego
    if (!dynamic) //pojazdy dopiero po ustawieniu animacji
     Init(); //generowanie siatek i zapis E3D
   }
@@ -1634,32 +1676,37 @@ void TModel3d::LoadFromBinFile(char *FileName,bool dynamic)
  */
 };
 
-void TModel3d::LoadFromTextFile(std::string FileName,bool dynamic)
+void TModel3d::LoadFromTextFile(std::string FileName, bool dynamic)
 {//wczytanie submodelu z pliku tekstowego
- WriteLogSS("Loading - text model: "+std::string(FileName), "");
+ WriteLogSS("Loading model3D: " + std::string(FileName), "");
  iFlags|=0x0200; //wczytano z pliku tekstowego (w³aœcicielami tablic s¹ submodle)
- cParser parser(FileName,cParser::buffer_FILE); //Ra: tu powinno byæ "models\\"...
+ cParser parser(FileName, cParser::buffer_FILE); //Ra: tu powinno byæ "models\\"...
  TSubModel *SubModel;
  std::string token;
  parser.getToken(token);
  iNumVerts=0; //w konstruktorze to jest
- while (token!="" || parser.eof())
+ while (token != "" || parser.eof())
  {
   std::string parent;
   //parser.getToken(parent);
   parser.getTokens(1,false); //nazwa submodelu nadrzêdnego bez zmieny na ma³e
   parser >> parent;
-  if (parent=="") break;
-  SubModel=new TSubModel();
-  iNumVerts+=SubModel->Load(parser,this,iNumVerts,dynamic);
-  SubModel->Parent=AddToNamed(parent.c_str(),SubModel); //bêdzie potrzebne do wyliczenia pozycji, np. pantografu
-  //iSubModelsCount++;
+  if (parent == "") break;
+
+  SubModel = new TSubModel();
+  if (debug_modelload) WriteLog("SM");
+  if (debug_modelload) WriteLogSS("PARENT:", "[" + parent + "]");
+ 
+  iNumVerts += SubModel->Load(parser, this, iNumVerts, dynamic);
+//WriteLogSS("NAMED:", "[" + chartostdstr(SubModel->pName) + "]");
+  SubModel->Parent=AddToNamed(parent.c_str(), SubModel); //bêdzie potrzebne do wyliczenia pozycji, np. pantografu
   parser.getToken(token);
  }
  //Ra: od wersji 334 przechylany jest ca³y model, a nie tylko pierwszy submodel
  //ale bujanie kabiny nadal u¿ywa bananów :( od 393 przywrócone, ale z dodatkowym warunkiem
  if (Global::iConvertModels&4)
  {//automatyczne banany czasem psu³y przechylanie kabin...
+
   if (dynamic&&Root)
   {if (Root->NextGet()) //jeœli ma jakiekolwiek kolejne
    {//dynamic musi mieæ "banana", bo tylko pierwszy obiekt jest animowany, a nastêpne nie
@@ -1671,6 +1718,8 @@ void TModel3d::LoadFromTextFile(std::string FileName,bool dynamic)
    Root->WillBeAnimated(); //bo z tym jest du¿o problemów
   }
  }
+ WriteLog("OK.");
+ WriteLog("");
 }
 
 void TModel3d::Init()
@@ -1801,10 +1850,6 @@ void TModel3d::SaveToBinFile(char *FileName)
  */
 };
 
-void TModel3d::BreakHierarhy()
-{
-// Error("Not implemented yet :(");
-};
 
 /*
 void TModel3d::Render(vector3 pPosition,double fAngle,GLuint ReplacableSkinId,int iAlpha)
@@ -1840,6 +1885,8 @@ void TModel3d::Render(vector3 pPosition,double fAngle,GLuint ReplacableSkinId,in
 
 void TModel3d::Render(double fSquareDistance,GLuint *ReplacableSkinId,int iAlpha)
 {
+//	WriteLog("void TModel3d::Render(double fSquareDistance,GLuint *ReplacableSkinId,int iAlpha)");
+
  iAlpha^=0x0F0F000F; //odwrócenie flag tekstur, aby wy³apaæ nieprzezroczyste
  if (iAlpha&iFlags&0x1F1F001F) //czy w ogóle jest co robiæ w tym cyklu?
  {TSubModel::fSquareDist=fSquareDistance; //zmienna globalna!
@@ -1937,7 +1984,7 @@ void TModel3d::RaRenderAlpha(vector3 pPosition,double fAngle,GLuint *ReplacableS
 //2011-03-16 cztery nowe funkcje renderowania z mo¿liwoœci¹ pochylania obiektów
 //-----------------------------------------------------------------------------
 
-void TModel3d::Render(vector3 *vPosition,vector3 *vAngle,GLuint *ReplacableSkinId,int iAlpha)
+void TModel3d::Render3(vector3 *vPosition, vector3 *vAngle, GLuint *ReplacableSkinId, int iAlpha)
 {//nieprzezroczyste, Display List
  glPushMatrix();
  glTranslated(vPosition->x,vPosition->y,vPosition->z);
@@ -1950,7 +1997,7 @@ void TModel3d::Render(vector3 *vPosition,vector3 *vAngle,GLuint *ReplacableSkinI
  Root->RenderDL();
  glPopMatrix();
 };
-void TModel3d::RenderAlpha(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId,int iAlpha)
+void TModel3d::RenderAlpha3(vector3* vPosition, vector3* vAngle, GLuint *ReplacableSkinId,int iAlpha)
 {//przezroczyste, Display List
  glPushMatrix();
  glTranslated(vPosition->x,vPosition->y,vPosition->z);
@@ -1962,7 +2009,7 @@ void TModel3d::RenderAlpha(vector3* vPosition,vector3* vAngle,GLuint *Replacable
  Root->RenderAlphaDL();
  glPopMatrix();
 };
-void TModel3d::RaRender(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId,int iAlpha)
+void TModel3d::RaRender3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId,int iAlpha)
 {//nieprzezroczyste, VBO
  glPushMatrix();
  glTranslated(vPosition->x,vPosition->y,vPosition->z);
@@ -1978,7 +2025,7 @@ void TModel3d::RaRender(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSki
  }
  glPopMatrix();
 };
-void TModel3d::RaRenderAlpha(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId,int iAlpha)
+void TModel3d::RaRenderAlpha3(vector3* vPosition,vector3* vAngle,GLuint *ReplacableSkinId,int iAlpha)
 {//przezroczyste, VBO
  glPushMatrix();
  glTranslated(vPosition->x,vPosition->y,vPosition->z);

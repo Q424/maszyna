@@ -12,6 +12,11 @@
 // 2015.04.18 solved GLEW functions problem
 // 2015.04.18 unsuccessful attempt to add a sky with dynamic lighting and color change based on shaders
 // 2015.04.18 second attempt to insert a module ground.cpp
+// 2015.04.30 skydome loading and render
+// 2015.05.01 loading t3d models and render (DL)
+// 2015.05.02 tracks loading and render (DL & VBO)
+// 2015.05.02 terrain loading and render (DL & VBO)
+// 2015.05.02 partial support modules including
 
 // Additional includes:
 // C:\DEPENDIENCES\devil\include
@@ -75,25 +80,27 @@ void TSky::Render()
 {
 	if (mdCloud)
 	{//jeśli jest model nieba
+		glDisable(GL_DEPTH_TEST);
 		glPushMatrix();
-		//glDisable(GL_DEPTH_TEST);
-		glTranslatef(Global::pCameraPosition.x, Global::pCameraPosition.y, Global::pCameraPosition.z);
-		glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+		
+		glTranslatef(Camera.Pos.x, Camera.Pos.y, Camera.Pos.z);
+		//glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 		if (Global::bUseVBO)
 		{//renderowanie z VBO
-		//-	mdCloud->RaRender(100, 0);
-		//-	mdCloud->RaRenderAlpha(100, 0);
+			mdCloud->RaRender(100, 0);
+			mdCloud->RaRenderAlpha(100, 0);
 		}
 		else
 		{//renderowanie z Display List
-		//-	mdCloud->Render(100, 0);
-		//-	mdCloud->RenderAlpha(100, 0);
+			mdCloud->Render(100, 0);
+			mdCloud->RenderAlpha(100, 0);
 		}
-		//glEnable(GL_DEPTH_TEST);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		//glEnable(GL_LIGHTING);
+
 		glPopMatrix();
-		glLightfv(GL_LIGHT0, GL_POSITION, Global::lightPos);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_LIGHTING);
+		//glLightfv(GL_LIGHT0, GL_POSITION, Global::lightPos);
 	}
 };
 
@@ -146,6 +153,8 @@ bool  TWorld::Init()
 	for (int i = 0; i < glexts.size(); i++) WriteLogSS(">", glexts[i]);
 
 	Global::detonatoryOK = true;
+	Global::bRenderAlpha = true;
+	Global::bUseVBO = false;
 
 	char glver[100];
 	char tolog[100];
@@ -161,17 +170,17 @@ bool  TWorld::Init()
 	WriteLog("");
 	Error = CHECKEXTENSIONS();
 	
+	Global::szDefaultExt = ".tga";
 
 	Global::bfonttex = TTexturesManager::GetTextureID("font.bmp", 0);  // FOR LOADER
 	Global::fonttexturex = TTexturesManager::GetTextureID("font.bmp", 0);
 	Global::loaderbackg = TTexturesManager::GetTextureID("logo.bmp", 0);
 	Global::logotex = TTexturesManager::GetTextureID("logo.bmp", 0);
 	Global::boxtex = TTexturesManager::GetTextureID("boxtex.bmp", 0);
-	Global::dirttex = TTexturesManager::GetTextureID("lensdirt_lowc.bmp", 0);
+	Global::notex = TTexturesManager::GetTextureID("notex.bmp", 0);
 
 	Resize(1280, 1024);
 
-	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 
 
@@ -183,7 +192,7 @@ bool  TWorld::Init()
 	glMatrixMode(GL_MODELVIEW); // Select The Modelview Matrix
 	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT); // Clear screen and depth buffer
 	glLoadIdentity();
-	glClearColor(0.2f, 0.4f, 0.33f, 1.0f); // Background Color
+	glClearColor(0.2f, 0.2f, 0.23f, 1.0f); // Background Color
 	WriteLog("glClearDepth(1.0f);  ");
 	glClearDepth(1.0f); // ZBuffer Value
 
@@ -214,7 +223,7 @@ bool  TWorld::Init()
 	glPointSize(2.0f);
   
 // ----------- LIGHTING SETUP ------------------------------------------------------------------------------------------
-	glm::vec3 lp = normalize(glm::vec3(-5100, 500, 500));
+	glm::vec3 lp = normalize(glm::vec3(-100, 300, -200));
 
 	Global::lightPos[0] = GLfloat(lp.x);
 	Global::lightPos[1] = GLfloat(lp.y);
@@ -224,7 +233,7 @@ bool  TWorld::Init()
 	WriteLog("glEnable(GL_NORMALIZE);");
 	glEnable(GL_NORMALIZE);
 	WriteLog("glEnable(GL_RESCALE_NORMAL);");
-	glEnable(GL_RESCALE_NORMAL);
+	//glEnable(GL_RESCALE_NORMAL);
 	WriteLog("glEnable(GL_COLOR_MATERIAL);");
 	glEnable(GL_COLOR_MATERIAL);
 	WriteLog("glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);");
@@ -257,24 +266,24 @@ bool  TWorld::Init()
 	glFogfv(GL_FOG_COLOR, FogColor); // Set Fog Color
 	//	glFogf(GL_FOG_DENSITY, 0.594f);						// How Dense Will
 	glHint(GL_FOG_HINT, GL_NICEST);					  
-	WriteLog("glFogf(GL_FOG_START, 1.0f);");
-	glFogf(GL_FOG_START, 1.0f); // Fog Start Depth
-	WriteLog("glFogf(GL_FOG_END, 200.0f);");
-	glFogf(GL_FOG_END, 90.0f); // Fog End Depth
+	WriteLog("glFogf(GL_FOG_START, 400.0f);");
+	glFogf(GL_FOG_START, 400.0f); // Fog Start Depth
+	WriteLog("glFogf(GL_FOG_END, 1700.0f);");
+	glFogf(GL_FOG_END, 1700.0f); // Fog End Depth
 	WriteLog("glEnable(GL_FOG);");
 	glEnable(GL_FOG); // Enables GL_FOG
 
 
 
-	EN_ALPHATEST(true);
-	EN_DITHER(false);
-	EN_MULTISAMPLE(false);
-	EN_POLYGONOFFSETLINE(true);
-	EN_POLYGONOFFSETPOINT(true);
-	EN_POLYGONSMOOTH(false);
-	EN_SAMPLEALPHATOCOVERAGE(true);
-	EN_SAMPLEALPHATOONE(true);
-	EN_FRAMEBUFFERSRGB(false);
+	//EN_ALPHATEST(true);
+	//EN_DITHER(false);
+	//EN_MULTISAMPLE(false);
+	//EN_POLYGONOFFSETLINE(true);
+	//EN_POLYGONOFFSETPOINT(true);
+	//EN_POLYGONSMOOTH(false);
+	//EN_SAMPLEALPHATOCOVERAGE(true);
+	//EN_SAMPLEALPHATOONE(true);
+	//EN_FRAMEBUFFERSRGB(false);
 
 	/*--------------------Render Initialization End---------------------*/
 
@@ -301,6 +310,10 @@ bool  TWorld::Init()
 	TSoundsManager::Init(hWIN);
 	WriteLog("Sound Init OK");
 
+	WriteLog("Model Manager Init");
+	TModelsManager::Init();
+	WriteLog("Model Manager Init OK");
+
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	Global::CAMERA.Position_Camera(5, 2.5, 13, 0, 2.5, 3, 0, 1, 0);  // Position      View(target)  Up
@@ -309,32 +322,31 @@ bool  TWorld::Init()
 	
 	//Global::glPrintxy(110, 10, "MaSZyna 2", 0);
 	glfwSwapBuffers(Global::window);
-	Sleep(2400);
-
-	//cParser parser("scenery.scn", cParser::buffer_FILE, subpath, false);
-
+	Sleep(2000);
 
 	//Camera.Init(Global::pFreeCameraInit[0], Global::pFreeCameraInitAngle[0]);
 	//Global::bFreeFlyModeFlag = true; //Ra: automatycznie włączone latanie
 	//Camera.Type = tp_Free;
 	//Camera.Reset();
-	WriteLog("CREATE TObject3d instance...");
-	TObject3d *O3D;
-	O3D = new TObject3d();
-	WriteLog("CREATE TObject3d instance OK.");
 
-	WriteLog("CREATE TSubObject instance...");
-	TSubObject *SO3D;
-	SO3D = new TSubObject();
-	WriteLog("CREATE TSubObject instance OK.");
+	Global::bManageNodes = false;
 
-	char *Name;
-	char *newName ="zlksajdkjskdjs";
-	Name = new char[strlen(newName) + 1];
+	Ground.Init("td-org.scn", hDC);
 
 	Clouds.Init();
 
-
+	// eventy aktywowane z klawiatury tylko dla jednego użytkownika
+	KeyEvents[0] = Ground.FindEvent("keyctrl00");
+	KeyEvents[1] = Ground.FindEvent("keyctrl01");
+	KeyEvents[2] = Ground.FindEvent("keyctrl02");
+	KeyEvents[3] = Ground.FindEvent("keyctrl03");
+	KeyEvents[4] = Ground.FindEvent("keyctrl04");
+	KeyEvents[5] = Ground.FindEvent("keyctrl05");
+	KeyEvents[6] = Ground.FindEvent("keyctrl06");
+	KeyEvents[7] = Ground.FindEvent("keyctrl07");
+	KeyEvents[8] = Ground.FindEvent("keyctrl08");
+	KeyEvents[9] = Ground.FindEvent("keyctrl09");
+	
 	Global::bActive = true;
  return true;
 };
@@ -344,7 +356,7 @@ void  TWorld::InOutKey()
 
 };
 
-void __fastcall TWorld::OnMouseMove(double x, double y)
+void TWorld::OnMouseMove(double x, double y)
 {//McZapkie:060503-definicja obracania myszy
 
 	Camera.OnCursorMove(x*Global::fMouseXScale, -y*Global::fMouseYScale);
@@ -375,9 +387,9 @@ void __fastcall TWorld::OnKeyDown(int cKey, int scancode, int action, int mode, 
 {
 	float camspeed = 2.0f * Global::fdt;
 
-	if (GetKeyState(VK_CONTROL) & 0x80) camspeed = 16.0f * (float)Global::fdt;
-	if (GetKeyState(VK_SHIFT) & 0x80) camspeed = 32.0f * (float)Global::fdt;
-	if (GetKeyState(VK_TAB) & 0x80) camspeed = 128.0f * (float)Global::fdt;
+	if (GetKeyState(VK_CONTROL) & 0x80) camspeed += (16.0f * (float)Global::fdt);
+	if (GetKeyState(VK_SHIFT) & 0x80) camspeed += (32.0f * (float)Global::fdt);
+	if (GetKeyState(VK_TAB) & 0x80) camspeed += (512.0f * (float)Global::fdt);
 
 	Global::KEYCOMMAND = ReplaceCharInString(Global::KEYCOMMAND, '"', "");
 
@@ -394,11 +406,14 @@ void __fastcall TWorld::OnKeyDown(int cKey, int scancode, int action, int mode, 
 
 	if ((GetKeyState('E') & 0x80)) Global::CAMERA.Move_CameraD(-CAMERASPEED*camspeed);
 
+	if (Global::KEYCOMMAND == "DRAWXYGRID") Global::bDrawXYGrid = !Global::bDrawXYGrid;
+
 	if (Global::KEYCOMMAND == "SCREENSHOT") 
 	{ 
 		takeScreenshot("screenshot.png"); Beep(1000, 50); Sleep(50); Beep(1000, 50); Sleep(50);
 		Global::KEYCOMMAND = ""; 
 	}
+	Global::KEYCOMMAND = "";
 
 
 }
@@ -412,6 +427,12 @@ bool  TWorld::Update(double dt)
 {
  //Camera.Pos = Global::Camerapos;
 // Camera.Update(); //uwzględnienie ruchu wywołanego klawiszami
+
+Timer::UpdateTimers(Global::iPause);
+if (!Global::iPause) 
+{ // jak pauza, to nie ma po co tego przeliczać
+	GlobalTime->UpdateMTableTime(Timer::GetDeltaTime()); // McZapkie-300302: czas rozkladowy
+}
 
  Global::pCameraPosition.x = Global::CAMERA.mPos.x;
  Global::pCameraPosition.y = Global::CAMERA.mPos.y;
@@ -453,7 +474,7 @@ bool  TWorld::RenderX()
  glColor4f(0.9f, 0.2f, 0.0f, 0.7f);
 
  glPushMatrix(); 
- glTranslatef(-4.6f, 1.75f, 6.0f);
+ glTranslatef(-4.6f, 0.75f, 6.0f);
  glBegin(GL_LINE_LOOP);
  glVertex2f(0.25f, 0.25f);
  glVertex2f(0.90f, 0.25f);
@@ -480,68 +501,104 @@ bool  TWorld::Render(double dt, int id)
 	gluPerspective(Global::FOV, (GLdouble)Global::iWindowWidth / (GLdouble)Global::iWindowHeight, 0.1f, 13234566.0f);  //1999950600.0f
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
+	glLightfv(GL_LIGHT0, GL_AMBIENT, Global::ambientDayLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, Global::diffuseDayLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, Global::specularDayLight);
 	//Camera.SetMatrix();
-	glLightfv(GL_LIGHT0, GL_POSITION, Global::lightPos);
 
 	gluLookAt(campos.x, campos.y, campos.z, Global::CAMERA.mView.x, Global::CAMERA.mView.y, Global::CAMERA.mView.z, Global::CAMERA.mUp.x, Global::CAMERA.mUp.y, Global::CAMERA.mUp.z);
+	
+	glLightfv(GL_LIGHT0, GL_POSITION, Global::lightPos);
 
 	DRAW_XYGRID();
 
 	Draw_SCENE000(0, 0, 0);
 	
 	glDisable(GL_FOG);
-    //Clouds.Render();
+    Clouds.Render();
     glEnable(GL_FOG);
 
+	Camera.Pos.x = campos.x;
+	Camera.Pos.y = campos.y;
+	Camera.Pos.z = campos.z;
+
+	if (Global::bUseVBO) 
+	{
+		if (!Ground.RenderVBO(Camera.Pos))
+			return false;
+		if (!Ground.RenderAlphaVBO(Camera.Pos))
+			return false;
+	}
+	else
+	{
+		if (!Ground.RenderDL(Camera.Pos))
+			return false;
+		if (!Ground.RenderAlphaDL(Camera.Pos))
+			return false;
+	}
+	
 	EN_TEX(0);
-	RenderX();
+	//RenderX();
 
 	EN_TEX(0);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 	glColor4f(0.9f, 0.6f, 0.1f, 1.0f);
 	glPushMatrix();
-	glPrint3D(0, 2, 6, "Nowa MaSZyna 2");
+	//glPrint3D(0, 1, 6, "Nowa MaSZyna 2");
 	glPopMatrix();
+
 
 
 	//switch2dRender();
 	EN_TEX(0);
+	float feets = campos.y * 3.28;
 	//glBindTexture(GL_TEXTURE_2D, 0);
-	glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
+	
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.3f, -0.80f);
+	glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
+
+	sprintf_s(fps, "time: %s", GlobalTime->GetTimeStr());
+	glRasterPos2f(-0.40f, 0.01f);
+	glPrint(fps);
+
+	glRasterPos2f(-0.40f, -0.00f);
+	glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
+	glPrint("----------------------------");
+
+	sprintf_s(fps, "cam: %.3f %.3f %.3f, alt ft = %.3f", campos.x, campos.y, campos.z, feets);
+	glRasterPos2f(-0.40f, -0.01f);
+	glPrint(fps);
 
 	sprintf_s(fps, "fps: %.3f fdt: %.3g", Global::FPS, Global::fdt);
-	glRasterPos2f(-0.40f, -0.01f);
+	glRasterPos2f(-0.40f, -0.02f);
 	glPrint(fps);
 
 	sprintf_s(str, "key: id=%i scode=%i act=%i str=%s", Global::keyid, Global::keyscancode, Global::keyaction, Global::KEYCODE.c_str());
 	glRasterPos2f(-0.40f, -0.03f);
-	glPrint(str);
+	//glPrint(str);
 
 	sprintf_s(str, "mods: id=%i", Global::keymods);
 	glRasterPos2f(-0.40f, -0.04f);
-	glPrint(str);
+	//glPrint(str);
 
 	glColor4f(0.2f, 0.8f, 0.2f, 0.9f);
 	sprintf_s(str, "command: %s", Global::KEYCOMMAND.c_str());
-	glRasterPos2f(-0.40f, -0.06f);
-	glPrint(str);
-
-	glRasterPos2f(-0.40f, -0.02f);
-	//glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
-	glPrint("----------------------------");
+	glRasterPos2f(-0.40f, -0.05f);
+	//glPrint(str);
 
 	EN_TEX(1);
-	sprintf_s(szBuffer, "Symulator Pojazdow Trakcyjnych MaSZyna 2");
+	//sprintf_s(szBuffer, "Symulator Pojazdow Trakcyjnych MaSZyna 2");
 	TColor rgba = Global::SetColor(0.9f, 0.7f, 0.0f, 0.9f);
-	QglPrint_(2, 1, szBuffer, 1, rgba);
+	//QglPrint_(2, 1, szBuffer, 1, rgba);
 
-	sprintf_s(szBuffer, "Symulator Pojazdow Trakcyjnych MaSZyna 4");
+	sprintf_s(szBuffer, "Symulator Pojazdow Trakcyjnych MaSZyna 2");
     rgba = Global::SetColor(0.2f, 0.2f, 0.2f, 0.9f);
 	QglPrint(10, 1015, szBuffer, 0, rgba);
 	
+
+	
+	ResourceManager::Sweep(Timer::GetSimulationTime());
  return true;
 };
 

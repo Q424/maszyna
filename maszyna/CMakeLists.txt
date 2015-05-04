@@ -40,8 +40,12 @@ set(MASZYNA_SOURCES
 	model3d.cpp
 	mdlmngr.cpp
 	ground.cpp
-        download.cpp
+	download.cpp
 	vbo.cpp
+	mtable.cpp
+	evlaunch.cpp
+	memcell.cpp
+	event.cpp
 )
 
 set(MASZYNA_HEADERS
@@ -75,13 +79,17 @@ set(MASZYNA_HEADERS
 	include/segment.h
 	include/trackfollower.h
 	include/pdownloader.h
-        include/track.h
+	include/track.h
 	include/classes.h
 	include/flags.h
 	include/float3d.h
 	include/animmodel.h
 	include/model3d.h
 	include/mdlmngr.h
+	include/mtable.h
+	include/evlaunch.h
+	include/memcell.h
+	include/event.h
 )
 
 set(Q_LIB_DIRS C:\\DEPENDIENCES\\devil)

@@ -331,6 +331,25 @@ void TSegment::RenderLoft(const vector6 *ShapePoints, int iNumShapePoints,
  //po modyfikacji - dla ujemnego (iNumShapePoints) w dodatkowych polach tabeli
  // podany jest przekrój koñcowy
  //podsypka toru jest robiona za pomoc¹ 6 punktów, szyna 12, drogi i rzeki na 3+2+3
+
+
+	GLfloat  ambientDayLight[] = { 0.18f, 0.18f, 0.18f, 1.0f };
+	GLfloat  diffuseDayLight[] = { 0.25f, 0.25f, 0.25f, 1.0f };
+	GLfloat  specularDayLight[] = { 0.95f, 0.94f, 0.90f, 1.0f };
+
+	ambientDayLight[0] = Global::ambientDayLight[0] - 0.15;
+	ambientDayLight[1] = Global::ambientDayLight[1] - 0.15;
+	ambientDayLight[2] = Global::ambientDayLight[2] - 0.15;
+
+	diffuseDayLight[0] = Global::diffuseDayLight[0] - 0.20;
+	diffuseDayLight[1] = Global::diffuseDayLight[1] - 0.20;
+	diffuseDayLight[2] = Global::diffuseDayLight[2] - 0.20;
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientDayLight);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseDayLight);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specularDayLight);
+
+
  if (iQualityFactor<1) iQualityFactor= 1; //co który segment ma byæ uwzglêdniony
  vector3 pos1,pos2,dir,parallel1,parallel2,pt,norm;
  double s,step,fOffset,tv1,tv2,t;
@@ -427,7 +446,9 @@ void TSegment::RenderLoft(const vector6 *ShapePoints, int iNumShapePoints,
   dir=GetDirection();
   //parallel1=Normalize(CrossProduct(dir,vector3(0,1,0)));
   parallel1=Normalize(vector3(-dir.z,0.0,dir.x)); //wektor poprzeczny
+
   glBegin(GL_TRIANGLE_STRIP);
+
   if (trapez)
    for (j=0;j<iNumShapePoints;j++)
    {

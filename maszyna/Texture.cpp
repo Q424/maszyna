@@ -554,8 +554,7 @@ bool __fastcall TTexture::LoadBUM(char *szFileName)
     glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
     glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, nTexturewidth, nTextureHeight, 0,
-                 GL_BGR_EXT, GL_UNSIGNED_BYTE, pBitmapData);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, nTexturewidth, nTextureHeight, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, pBitmapData);
 
 
 	if(pBitmapData)
@@ -863,7 +862,8 @@ GLuint __fastcall TTexturesManager::GetTextureID( char *Name, bool dynamic )  //
             return (tmp->ID);
     }
 //WriteLog(buf);
-    return (LoadFromFile( buf ));
+	if (!FileExists(buf)) return Global::notex; 
+	return (LoadFromFile(buf));
 }
 
 
@@ -899,17 +899,7 @@ bool __fastcall TTexturesManager::GetAlpha( GLuint ID )
     }
     return (false);
 }
-/*
-bool __fastcall TTexturesManager::GetHash( GLuint ID )
-{
-    for (TTexture *tmp= First; tmp!=NULL; tmp= tmp->Next)
-    {
-        if (tmp->ID==ID)
-            return (tmp->HasHash);
-    }
-    return (false);
-}
-*/
+
 
 //---------------------------------------------------------------------------
 

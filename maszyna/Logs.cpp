@@ -140,6 +140,13 @@ void WriteLogSS(std::string text, std::string token)
             WriteLog(stdstrtochara(tolog));
 }
 
+void Error(std::string text)
+{
+	char tolog[100];
+	sprintf_s(tolog, "ERROR! %s",  text.c_str());
+	WriteLog(stdstrtochara(tolog));
+}
+
 void WriteQ3D(LPSTR text, std::string token, char* fn, bool f)
 {
 	char ADDTOFILE[200];

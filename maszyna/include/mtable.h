@@ -42,23 +42,23 @@ public:
 	std::string NextStationName;
 	double LastStationLatency;
 	int Direction;
-	double __fastcall CheckTrainLatency(void);
-	std::string __fastcall ShowRelation();
-	double __fastcall WatchMTable(double DistCounter);
-	std::string __fastcall NextStop();
-	bool __fastcall IsStop(void);
-	bool __fastcall IsTimeToGo(double hh, double mm);
-	bool __fastcall UpdateMTable(double hh, double mm, std::string NewName);
-	__fastcall TTrainParameters(std::string NewTrainName);
-	void __fastcall NewName(std::string NewTrainName);
-	bool __fastcall LoadTTfile(std::string scnpath);
-	bool __fastcall DirectionChange(void);
-	void __fastcall StationIndexInc(void);
+	double CheckTrainLatency(void);
+	std::string ShowRelation();
+	double WatchMTable(double DistCounter);
+	std::string NextStop();
+	bool IsStop(void);
+	bool IsTimeToGo(double hh, double mm);
+	bool UpdateMTable(double hh, double mm, std::string NewName);
+	TTrainParameters(std::string NewTrainName);
+	void NewName(std::string NewTrainName);
+	bool LoadTTfile(std::string scnpath);
+	bool DirectionChange(void);
+	void StationIndexInc(void);
 public:
 
-	/* TObject.Create */ inline __fastcall TTrainParameters(void) { }
+	/* TObject.Create */ inline TTrainParameters(void) { }
 
-	/* TObject.Destroy */ inline __fastcall ~TTrainParameters(void) { }
+	/* TObject.Destroy */ inline ~TTrainParameters(void) { }
 
 	
 };
@@ -83,18 +83,19 @@ public:
 	int m2;
 	int s1;
 	int s2;
-	//AnsiString shh;
-	//AnsiString smm;
-	//AnsiString sss;
+	std::string shh;
+	std::string smm;
+	std::string sss;
 	float mr;
 	double bysec;
-	void __fastcall UpdateMTableTime(double deltaT);
-	void __fastcall Init(int InitH, int InitM, int InitSRH, int InitSRM, int InitSSH, int InitSSM);
+	void UpdateMTableTime(double deltaT);
+	void Init(int InitH, int InitM, int InitSRH, int InitSRM, int InitSSH, int InitSSM);
+	std::string GetTimeStr();
 public:
 
-__fastcall TMTableTime(void)  { }
+ TMTableTime(void) { }
 
- __fastcall ~TMTableTime(void) { }
+~TMTableTime(void) { }
 
 	
 };

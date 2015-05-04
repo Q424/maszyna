@@ -48,7 +48,7 @@ private:
  float4 qDesired; //pozycja koñcowa (1 dla interpolacji)
  float fAngleCurrent; //parametr interpolacyjny: 0=start, 1=docelowy
  float fAngleSpeed; //zmiana parametru interpolacji w sekundach
- TSubObject *pSubModel;
+ TSubModel *pSubModel;
  float4x4 *mAnim; //macierz do animacji kwaternionowych
  //dla kinematyki odwróconej u¿ywane s¹ kwaterniony
  float fLength; //d³ugoœæ koœci dla IK
@@ -63,7 +63,7 @@ public:
  TAnimContainer *pNext;
  TAnimContainer();
  ~TAnimContainer();
- bool Init(TSubObject *pNewSubModel);
+ bool Init(TSubModel *pNewSubModel);
  //std::string inline GetName() { return std::string(pSubModel?pSubModel->asName.c_str():""); };
  //std::string inline GetName() { return std::string(pSubModel?pSubModel->pName:""); };
 //- char* NameGet() {return (pSubModel?pSubModel->pName:NULL);};
@@ -96,11 +96,11 @@ class TAnimModel
 {//opakowanie modelu, okreœlaj¹ce stan egzemplarza
 private:
  TAnimContainer *pRoot; //pojemniki steruj¹ce, tylko dla aniomowanych submodeli
- TObject3d *pModel;
+ TModel3d *pModel;
  double fBlinkTimer;
  int iNumLights;
- TSubObject *LightsOn[iMaxNumLights]; //Ra: te wskaŸniki powinny byæ w ramach TModel3d
- TSubObject *LightsOff[iMaxNumLights];
+ TSubModel *LightsOn[iMaxNumLights]; //Ra: te wskaŸniki powinny byæ w ramach TModel3d
+ TSubModel *LightsOff[iMaxNumLights];
  vector3 vAngle; //bazowe obroty egzemplarza wzglêdem osi
  int iTexAlpha; //¿eby nie sprawdzaæ za ka¿dym razem, dla 4 wymiennych tekstur
  std::string asText; //tekst dla wyœwietlacza znakowego
@@ -113,7 +113,7 @@ public:
  GLuint ReplacableSkinId[5]; //McZapkie-020802: zmienialne skory
  TAnimModel();
  ~TAnimModel();
- bool Init(TObject3d *pNewModel);
+ bool Init(TModel3d *pNewModel);
  bool Init(std::string asName, std::string asReplacableTexture);
  bool Load(cParser *parser, bool ter=false);
  TAnimContainer* AddContainer(char *pName);
@@ -122,8 +122,8 @@ public:
  void RenderAlphaDL(vector3 pPosition=vector3(0,0,0),double fAngle=0);
  void RenderVBO(vector3 pPosition=vector3(0,0,0),double fAngle=0);
  void RenderAlphaVBO(vector3 pPosition=vector3(0,0,0),double fAngle=0);
- void RenderDL(vector3* vPosition);
- void RenderAlphaDL(vector3* vPosition);
+ void RenderDLq(vector3* vPosition);
+ void RenderAlphaDLq(vector3* vPosition);
  void RenderVBO(vector3* vPosition);
  void RenderAlphaVBO(vector3* vPosition);
  void RaPrepare();
@@ -132,7 +132,7 @@ public:
  {vAngle.x=a; vAngle.y=b; vAngle.z=c;};
  bool TerrainLoaded();
  int TerrainCount();
- TSubObject* TerrainSquare(int n);
+ TSubModel* TerrainSquare(int n);
  void TerrainRenderVBO(int n);
  void AnimationVND(void* pData, double a, double b, double c, double d);
  void LightSet(int n,float v);

@@ -35,6 +35,7 @@ public:
  int getProgress() const;	// percentage of file processed.
  //load traction?
  bool LoadTraction;
+ std::string CWD;
 protected:
  // methods:
  std::string readToken(bool ToLower=true,const char* Break="\n\t ;");

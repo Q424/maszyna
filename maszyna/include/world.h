@@ -13,7 +13,7 @@ class TSky
 {
 private:
 	TAnimModel *anCloud;
-	TObject3d *mdCloud;
+	TModel3d *mdCloud;
 public:
 	TSky();
 	~TSky();
@@ -41,7 +41,9 @@ public:
    ~TWorld();
   
 private:
+	TGround Ground;
 	TSky Clouds;
+	TEvent *KeyEvents[10]; //eventy wyzwalane z klawiaury
     bool  RenderX();
 
 public:

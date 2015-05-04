@@ -453,7 +453,7 @@ int main(int argc, TCHAR **argv)
 	ssize = split(screensizeValue, ':');                                   // Splits screensize key value into two params
   //std::cerr << "screensize: " << ssize[0] << "x" << ssize[1] << "\n";
 	MASZYNA_TRACE_WRITELINE(AppMain, Debug, "screen size: %ix%i", ssize[0], ssize[1]);
-	Sleep(2000);
+	Sleep(1000);
 	WriteLog("");
 
 	CHECKUPDATES(checkupdVal);
@@ -476,7 +476,7 @@ int main(int argc, TCHAR **argv)
 	std::cerr << "video refr: " << mode->refreshRate << std::endl;
 	const char* monitorname = glfwGetMonitorName(monitors[MONITORSEL_VAL]);
 	std::cerr << "Monitor name: " << monitorname << std::endl;
-	Sleep(2000);
+	Sleep(1000);
 
     //glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);

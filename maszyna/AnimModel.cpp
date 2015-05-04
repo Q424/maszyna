@@ -11,10 +11,9 @@
 #include "animmodel.h"
 #include "classes.h"
 #include "model3d.h"
-#include "object3d.h"
-//#include "AnimModel.h"
-//#include "usefull.h"
-//#include "Timer.h"
+#include "usefull.h"
+#include "Timer.h"
+
 //#include "MdlMngr.h"
 //#include "Texture.h"
 //#include "Globals.h"
@@ -89,7 +88,7 @@ TAnimContainer::~TAnimContainer()
  delete mAnim; //AnimContainer jest w³aœcicielem takich macierzy
 }
 
-bool TAnimContainer::Init(TSubObject *pNewSubModel)
+bool TAnimContainer::Init(TSubModel *pNewSubModel)
 {
  fRotateSpeed=0.0f;
  pSubModel=pNewSubModel;
@@ -329,9 +328,9 @@ TAnimModel::~TAnimModel()
  SafeDelete(pRoot);
 }
 
-bool TAnimModel::Init(TObject3d *pNewModel)
+bool TAnimModel::Init(TModel3d *pNewModel)
 {
-//- fBlinkTimer=double(random(1000*fOffTime))/(1000*fOffTime);;
+// fBlinkTimer=double(random(1000*fOffTime))/(1000*fOffTime);;
  pModel=pNewModel;
  return (pModel!=NULL);
 }
@@ -339,11 +338,16 @@ bool TAnimModel::Init(TObject3d *pNewModel)
 bool TAnimModel::Init(std::string asName, std::string asReplacableTexture)
 {
 
-	WriteLog("bool TAnimModel::Init(std::string asName, std::string asReplacableTexture)");
+if (Global::bLogFPHeaders) WriteLog("bool TAnimModel::Init(std::string asName, std::string asReplacableTexture)");
+WriteLog(asReplacableTexture.c_str());
+
  if (asReplacableTexture.substr(1, 1) == "*") //od gwiazdki zaczynaj¹ siê teksty na wyœwietlaczach
   asText=asReplacableTexture.substr(2,asReplacableTexture.length()-1); //zapamiêtanie tekstu
- else if (asReplacableTexture!="none")
-  ReplacableSkinId[1]=TTexturesManager::GetTextureID(stdstrtochar(asReplacableTexture.c_str()), false);
+ else if (asReplacableTexture != "none")
+ {
+	 WriteLogSS("replacable:", asReplacableTexture);
+	 ReplacableSkinId[1] = TTexturesManager::GetTextureID(stdstrtochar(asReplacableTexture), false);
+ }
 
  if (TTexturesManager::GetAlpha(ReplacableSkinId[1]))
   iTexAlpha=0x31310031; //tekstura z kana³em alfa - nie renderowaæ w cyklu nieprzezroczystych
@@ -378,7 +382,7 @@ bool TAnimModel::Load(cParser *parser, bool ter)
  }
  else
  {//wi¹zanie œwiate³, o ile model wczytany
-	 /*
+	 
   LightsOn[0]=pModel->GetFromName("Light_On00");
   LightsOn[1]=pModel->GetFromName("Light_On01");
   LightsOn[2]=pModel->GetFromName("Light_On02");
@@ -395,7 +399,7 @@ bool TAnimModel::Load(cParser *parser, bool ter)
   LightsOff[5]=pModel->GetFromName("Light_Off05");
   LightsOff[6]=pModel->GetFromName("Light_Off06");
   LightsOff[7]=pModel->GetFromName("Light_Off07");
-  */
+  
  }
  for (int i=0;i<iMaxNumLights;++i)
   if (LightsOn[i]||LightsOff[i]) //Ra: zlikwidowa³em wymóg istnienia obu
@@ -427,7 +431,7 @@ bool TAnimModel::Load(cParser *parser, bool ter)
 TAnimContainer* TAnimModel::AddContainer(char *pName)
 {//dodanie sterowania submodelem dla egzemplarza
  if (!pModel) return NULL;
- TSubObject *tsb=pModel->GetFromNameQ(pName);
+ TSubModel *tsb=pModel->GetFromName(pName);
  if (tsb)
  {
   TAnimContainer *tmp=new TAnimContainer();
@@ -446,8 +450,8 @@ TAnimContainer* TAnimModel::GetContainer(char *pName)
  for (pCurrent=pRoot;pCurrent!=NULL;pCurrent=pCurrent->pNext)
   //if (pCurrent->GetName()==pName)
  
-  //-if (stricmp(pCurrent->NameGet(),pName)==0)
- //-  return pCurrent;
+ // if (stricmp(pCurrent->NameGet(),pName)==0) // TODO: dkosfdjio
+ //  return pCurrent;
  return AddContainer(pName);
 }
 
@@ -482,30 +486,30 @@ void TAnimModel::RaPrepare()
 
 void TAnimModel::RenderVBO(vector3 pPosition,double fAngle)
 {//sprawdza œwiat³a i rekurencyjnie renderuje TModel3d
-//- RaPrepare();
+ RaPrepare();
 //-if (pModel) //renderowanie rekurencyjne submodeli
 //- pModel->RaRender(pPosition,fAngle,ReplacableSkinId,iTexAlpha);
 }
 
 void TAnimModel::RenderAlphaVBO(vector3 pPosition,double fAngle)
 {
-//- RaPrepare();
+ RaPrepare();
 //- if (pModel) //renderowanie rekurencyjne submodeli
 //-  pModel->RaRenderAlpha(pPosition,fAngle,ReplacableSkinId,iTexAlpha);
 };
 
 void TAnimModel::RenderDL(vector3 pPosition, double fAngle)
 {
-//- RaPrepare();
-//- if (pModel) //renderowanie rekurencyjne submodeli
-//-  pModel->Render(pPosition, fAngle, ReplacableSkinId, iTexAlpha);
+ RaPrepare();
+// if (pModel) //renderowanie rekurencyjne submodeli
+//  pModel->Render(pPosition, fAngle, ReplacableSkinId, iTexAlpha);
 }
 
 void TAnimModel::RenderAlphaDL(vector3 pPosition,double fAngle)
 {
-//- RaPrepare();
+ RaPrepare();
 //- if (pModel)
- //- pModel->RenderAlpha(pPosition,fAngle,ReplacableSkinId,iTexAlpha);
+//-  pModel->RenderAlpha(pPosition,fAngle,ReplacableSkinId,iTexAlpha);
 };
 
 int TAnimModel::Flags()
@@ -513,6 +517,7 @@ int TAnimModel::Flags()
  int i=pModel?pModel->Flags():0; //pobranie flag ca³ego modelu
  if (ReplacableSkinId[1]>0) //jeœli ma wymienn¹ teksturê 0
   i|=(i&0x01010001)*((iTexAlpha&1)?0x20:0x10);
+
  //if (ReplacableSkinId[2]>0) //jeœli ma wymienn¹ teksturê 1
  // i|=(i&0x02020002)*((iTexAlpha&1)?0x10:0x08);
  //if (ReplacableSkinId[3]>0) //jeœli ma wymienn¹ teksturê 2
@@ -526,17 +531,17 @@ int TAnimModel::Flags()
 //2011-03-16 cztery nowe funkcje renderowania z mo¿liwoœci¹ pochylania obiektów
 //-----------------------------------------------------------------------------
 
-void TAnimModel::RenderDL(vector3* vPosition)
+void TAnimModel::RenderDLq(vector3* vPosition)
 {
-//- RaPrepare();
-//- if (pModel) //renderowanie rekurencyjne submodeli
-//-  pModel->Render(vPosition,&vAngle,ReplacableSkinId,iTexAlpha);
+ RaPrepare();
+ if (pModel) //renderowanie rekurencyjne submodeli
+  pModel->Render3(vPosition,&vAngle,ReplacableSkinId,iTexAlpha);
 };
-void TAnimModel::RenderAlphaDL(vector3* vPosition)
+void TAnimModel::RenderAlphaDLq(vector3* vPosition)
 {
-//- RaPrepare();
-//- if (pModel) //renderowanie rekurencyjne submodeli
-//-  pModel->RenderAlpha(vPosition,&vAngle,ReplacableSkinId,iTexAlpha);
+ RaPrepare();
+ if (pModel) //renderowanie rekurencyjne submodeli
+  pModel->RenderAlpha3(vPosition,&vAngle,ReplacableSkinId,iTexAlpha);
 };
 void TAnimModel::RenderVBO(vector3* vPosition)
 {
@@ -563,7 +568,7 @@ int TAnimModel::TerrainCount()
  return pModel?pModel->TerrainCount():0;
 };
 
-TSubObject* TAnimModel::TerrainSquare(int n)
+TSubModel* TAnimModel::TerrainSquare(int n)
 {//pobieranie wskaŸników do pierwszego submodelu
  return pModel?pModel->TerrainSquare(n):0;
 };

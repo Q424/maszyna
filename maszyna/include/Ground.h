@@ -205,7 +205,7 @@ public:
 };
 
 //Ra: trzeba sprawdziæ wydajnoœæ siatki
-const int iNumSubRects=5; //na ile dzielimy kilometr
+const int iNumSubRects=2; //na ile dzielimy kilometr
 const int iNumRects=500;
 //const double fHalfNumRects=iNumRects/2.0; //po³owa do wyznaczenia œrodka
 const int iTotalNumSubRects=iNumRects*iNumSubRects;

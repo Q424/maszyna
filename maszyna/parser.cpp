@@ -1,9 +1,9 @@
-
+// EQUAL WITH PATTERN - 
 #define _USE_OLD_RW_STL
 
 #include "parser.h"
 #include "logs.h"
-
+#include "qstrutils.h"
 /*
     MaSzyna EU07 locomotive simulator parser
     Copyright (C) 2003  TOLARIS
@@ -14,8 +14,8 @@
 // cParser -- generic class for parsing text data.
 
 // constructors
-cParser::cParser(std::string Stream, buffertype Type, std::string Path,
-                 bool tr) {
+cParser::cParser(std::string Stream, buffertype Type, std::string Path,  bool tr) {
+	
   LoadTraction = tr;
   // build comments map
   mComments.insert(commentmap::value_type("/*", "*/"));
@@ -83,6 +83,7 @@ bool cParser::getTokens(int Count, bool ToLower, const char *Break) {
     return true;
 }
 
+
 std::string cParser::readToken(bool ToLower, const char *Break) {
   std::string token = "";
   size_t pos; // początek podmienianego ciągu
@@ -127,27 +128,40 @@ std::string cParser::readToken(bool ToLower, const char *Break) {
               token)) // don't glue together words separated with comment
         break;
     }
-  } while (token == "" &&
-           mStream->peek() != EOF); // double check to deal with trailing spaces
+  } while (token == "" &&  mStream->peek() != EOF); // double check to deal with trailing spaces
+
   // launch child parser if include directive found.
   // NOTE: parameter collecting uses default set of token separators.
-  if (token.compare("include") == 0) { // obsługa include
+  SetCurrentDirectory(Global::asCWD.c_str());
+
+  if (token.compare("include") == 0) 
+  { // obsługa include
     std::string includefile = readToken(ToLower); // nazwa pliku
-    if (LoadTraction ? true
-                     : ((includefile.find("tr/") == std::string::npos) &&
-                        (includefile.find("tra/") == std::string::npos))) {
+	std::string incfile =  "\\scenery\\" + includefile; // Global::asCWD +
+
+	WriteLog("");
+	WriteLogSS("INCLUDE:", incfile);
+
+    if (LoadTraction ? true : ((includefile.find("tr/") == std::string::npos) && (includefile.find("tra/") == std::string::npos)))
+	 {
       // std::string trtest2="niemaproblema"; //nazwa odporna na znalezienie
       // "tr/"
       // if (trtest=="x") //jeśli nie wczytywać drutów
       // trtest2=includefile; //kopiowanie ścieżki do pliku
       std::string parameter = readToken(false); // w parametrach nie zmniejszamy
-      while (parameter.compare("end") != 0) {
-        parameters.push_back(parameter);
-        parameter = readToken(ToLower);
-      }
+      while (parameter.compare("end") != 0) 
+		{
+		   parameters.push_back(parameter);
+		   parameter = readToken(ToLower);
+	    }
       // if (trtest2.find("tr/")!=0)
-      mIncludeParser =
-          new cParser(includefile, buffer_FILE, mPath, LoadTraction);
+
+
+	  if (FileExists(incfile.c_str())) WriteLog("exist"); else WriteLog("missed");
+
+	  
+
+      mIncludeParser = new cParser(includefile, buffer_FILE, mPath, LoadTraction);
       if (mIncludeParser->mSize <= 0)
         WriteLogSS("Missed include: " + includefile, "?"); // TODO: errorlog
     } else
@@ -158,21 +172,21 @@ std::string cParser::readToken(bool ToLower, const char *Break) {
   return token;
 }
 
-bool cParser::trimComments(std::string &String) {
-  for (commentmap::iterator cmIt = mComments.begin(); cmIt != mComments.end();
-       ++cmIt) {
-    if (String.find((*cmIt).first) != std::string::npos) {
+bool cParser::trimComments(std::string &String)
+{
+  for (commentmap::iterator cmIt = mComments.begin(); cmIt != mComments.end();  ++cmIt) 
+   {
+    if (String.find((*cmIt).first) != std::string::npos) 
+	 {
       readComment((*cmIt).second);
       String.resize(String.find((*cmIt).first));
       return true;
+     }
     }
-  }
   return false;
 }
 
-std::string cParser::readComment(
-    const std::string
-        Break) { // pobieranie znaków aż do znalezienia znacznika końca
+std::string cParser::readComment( const std::string  Break) { // pobieranie znaków aż do znalezienia znacznika końca
   std::string token = "";
   while (mStream->peek() != EOF) { // o ile nie koniec pliku
     token += mStream->get(); // pobranie znaku

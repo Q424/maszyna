@@ -1,15 +1,15 @@
 //---------------------------------------------------------------------------
 
-#pragma hdrstop
-#define GLFW_INCLUDE_GLU
-#include <GL/glew.h> // include GLEW and new version of GL on Windows
+//#pragma hdrstop
+//#define GLFW_INCLUDE_GLU
+//#include <GL/glew.h> // include GLEW and new version of GL on Windows
 #include "commons.h"
 #include "commons_usr.h"
 #include "include/VBO.h"
 //#include "usefull.h"
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)
+
 
 CMesh::CMesh() { // utworzenie pustego obiektu
   m_pVNT = NULL;

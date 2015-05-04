@@ -232,6 +232,7 @@ public:
 	static float fLatitudeDeg;
 	static float fSunSpeed;
 	static float fTimeAngleDeg;
+	static float fFriction;
 	static bool bDoubleAmbient; //podwójna jasnoœæ ambient
 	static double fMoveLight; //numer dnia w roku albo -1
 	static double fLuminance; //jasnoœæ œwiat³a do automatycznego zapalania
@@ -251,8 +252,17 @@ public:
 	static bool bRenderAlpha;
 	static bool bLoadTraction;
 	static bool bRollFix;
+	static bool bEnableTraction;
+	static bool bDecompressDDS;
+	static bool bJoinEvents; //czy grupowaæ eventy o tych samych nazwach
+	static bool DebugModeFlag;
+	static bool bLogFPHeaders;
+
+	static int iHiddenEvents; //czy ³¹czyæ eventy z torami poprzez nazwê toru
+	static int iSlowMotion;
 	static int iReCompile; //zwiêkszany, gdy trzeba odœwie¿yæ siatki
 	static bool bUseVBO; //czy jest VBO w karcie graficznej
+	static bool bDrawXYGrid;
 	static int iPARSERBYTESPASSED;
 	static int iNODES;
 	static int postep;
@@ -267,6 +277,8 @@ public:
 	static int keybindsnum;
 	static int iRailProFiltering;
 	static int iBallastFiltering;
+	static int iDefaultFiltering; // domyœlne rozmywanie tekstur TGA bez alfa
+	static int iDynamicFiltering; // domyœlne rozmywanie tekstur pojazdów
 	static int iWriteLogEnabled;
 	static int iMultiplayer;
 	static int iCameraLast;
@@ -285,6 +297,10 @@ public:
 	static std::string asCurrentTexturePath;
 	static TAnimModel *pTerrainCompact; //obiekt terenu do ewentualnego zapisania w pliku
 
+	static int iModifyTGA;
+	static int iTextures;
+	static GLint iMaxTextureSize;
+	static GLuint notex;
 	static GLuint boxtex;
 	static GLuint balltex;
 	static GLuint dirttex;

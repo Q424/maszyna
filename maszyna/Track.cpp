@@ -183,6 +183,8 @@ void TTrack::Init()
 
 TTrack* TTrack::Create400m(int what,double dx)
 {//tworzenie toru do wstawiania taboru podczas konwersji na E3D
+	TTrack* trk;
+	/*
  TGroundNode *tmp=new TGroundNode(TP_TRACK); //node
  TTrack* trk=tmp->pTrack;
  trk->bVisible=false; //nie potrzeba pokazywaæ, zreszt¹ i tak nie ma tekstur
@@ -194,98 +196,15 @@ TTrack* TTrack::Create400m(int what,double dx)
  r->NodeAdd(tmp); //dodanie toru do segmentu
  r->Sort(); //¿eby wyœwietla³ tabor z dodanego toru
  r->Release(); //usuniêcie skompilowanych zasobów
+ */
  return trk;
 };
 
 TTrack* TTrack::NullCreate(int dir)
 {//tworzenie toru wykolejaj¹cego od strony (dir), albo pêtli dla samochodów
- TGroundNode *tmp=new TGroundNode(TP_TRACK),*tmp2=NULL; //node
- TTrack* trk=tmp->pTrack; //tor; UWAGA! obrotnica mo¿e generowaæ du¿e iloœci tego
- //tmp->iType=TP_TRACK;
- //TTrack* trk=new TTrack(tmp); //tor; UWAGA! obrotnica mo¿e generowaæ du¿e iloœci tego
- //tmp->pTrack=trk;
- trk->bVisible=false; //nie potrzeba pokazywaæ, zreszt¹ i tak nie ma tekstur
- //trk->iTrapezoid=1; //s¹ przechy³ki do uwzglêdniania w rysowaniu
- trk->iCategoryFlag=(iCategoryFlag&15)|0x80; //taki sam typ plus informacja, ¿e dodatkowy
- double r1,r2;
- Segment->GetRolls(r1,r2); //pobranie przechy³ek na pocz¹tku toru
- vector3 p1,cv1,cv2,p2; //bêdziem tworzyæ trajektoriê lotu
- if (iCategoryFlag&1)
- {//tylko dla kolei
-  trk->iDamageFlag=128; //wykolejenie
-  trk->fVelocity=0.0; //koniec jazdy
-  trk->Init(); //utworzenie segmentu
-  switch (dir)
-  {//³¹czenie z nowym torem
-   case 0:
-    p1=Segment->FastGetPoint_0();
-    p2=p1-450.0*Normalize(Segment->GetDirection1());
-    trk->Segment->Init(p1,p2,5,-RadToDeg(r1),70.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    ConnectPrevPrev(trk,0);
-   break;
-   case 1:
-    p1=Segment->FastGetPoint_1();
-    p2=p1-450.0*Normalize(Segment->GetDirection2());
-    trk->Segment->Init(p1,p2,5,RadToDeg(r2),70.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    ConnectNextPrev(trk,0);
-   break;
-   case 3: //na razie nie mo¿liwe
-    p1=SwitchExtension->Segments[1]->FastGetPoint_1(); //koniec toru drugiego zwrotnicy
-    p2=p1-450.0*Normalize(SwitchExtension->Segments[1]->GetDirection2()); //przed³u¿enie na wprost
-    trk->Segment->Init(p1,p2,5,RadToDeg(r2),70.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    ConnectNextPrev(trk,0);
-    //trk->ConnectPrevNext(trk,dir);
-    SetConnections(1); //skopiowanie po³¹czeñ
-    Switch(1); //bo siê prze³¹czy na 0, a to coœ chce siê przecie¿ wykoleiæ na bok
-   break; //do drugiego zwrotnicy... nie zadzia³a?
-  }
- }
- else
- {//tworznie pêtelki dla samochodów
-  trk->fVelocity=20.0; //zawracanie powoli
-  trk->fRadius=20.0; //promieñ, aby siê dodawa³o do tabelki prêdkoœci i liczy³o narastaj¹co
-  trk->Init(); //utworzenie segmentu
-  tmp2=new TGroundNode(TP_TRACK); //drugi odcinek do zapêtlenia
-  TTrack* trk2=tmp2->pTrack;
-  trk2->iCategoryFlag=(iCategoryFlag&15)|0x80; //taki sam typ plus informacja, ¿e dodatkowy
-  trk2->bVisible=false;
-  trk2->fVelocity=20.0; //zawracanie powoli
-  trk2->fRadius=20.0; //promieñ, aby siê dodawa³o do tabelki prêdkoœci i liczy³o narastaj¹co
-  trk2->Init(); //utworzenie segmentu
-  switch (dir)
-  {//³¹czenie z nowym torem
-   case 0:
-    p1=Segment->FastGetPoint_0();
-    cv1=-20.0*Normalize(Segment->GetDirection1()); //pierwszy wektor kontrolny
-    p2=p1+cv1+cv1; //40m
-    trk->Segment->Init(p1,p1+cv1,p2+vector3(-cv1.z,cv1.y,cv1.x),p2,2,-RadToDeg(r1),0.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    ConnectPrevPrev(trk,0);
-    trk2->Segment->Init(p1,p1+cv1,p2+vector3(cv1.z,cv1.y,-cv1.x),p2,2,-RadToDeg(r1),0.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    trk2->iPrevDirection=0; //zwrotnie do tego samego odcinka
-   break;
-   case 1:
-    p1=Segment->FastGetPoint_1();
-    cv1=-20.0*Normalize(Segment->GetDirection2()); //pierwszy wektor kontrolny
-    p2=p1+cv1+cv1;
-    trk->Segment->Init(p1,p1+cv1,p2+vector3(-cv1.z,cv1.y,cv1.x),p2,2,RadToDeg(r2),0.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    ConnectNextPrev(trk,0);
-    trk2->Segment->Init(p1,p1+cv1,p2+vector3(cv1.z,cv1.y,-cv1.x),p2,2,RadToDeg(r2),0.0); //bo prosty, kontrolne wyliczane przy zmiennej przechy³ce
-    trk2->iPrevDirection=1; //zwrotnie do tego samego odcinka
-   break;
-  }
-  trk2->pPrev=this;
-  trk->ConnectNextNext(trk2,1); //po³¹czenie dwóch dodatkowych odcinków
-  tmp2->pCenter=(0.5*(p1+p2)); //œrodek, aby siê mog³o wyœwietliæ
- }
- //trzeba jeszcze dodaæ do odpowiedniego segmentu, aby siê renderowa³y z niego pojazdy
- tmp->pCenter=(0.5*(p1+p2)); //œrodek, aby siê mog³o wyœwietliæ
- if (tmp2) tmp2->pCenter=tmp->pCenter; //ten sam œrodek jest
- //Ra: to poni¿ej to pora¿ka, ale na razie siê nie da inaczej
- TSubRect *r=Global::pGround->GetSubRect(tmp->pCenter.x,tmp->pCenter.z);
- r->NodeAdd(tmp); //dodanie toru do segmentu
- if (tmp2) r->NodeAdd(tmp2); //drugiego te¿
- r->Sort(); //¿eby wyœwietla³ tabor z dodanego toru
- r->Release(); //usuniêcie skompilowanych zasobów
+
+ TTrack* trk; //tor; UWAGA! obrotnica mo¿e generowaæ du¿e iloœci tego
+ 
  return trk;
 };
 
@@ -375,9 +294,13 @@ void TTrack::Load(cParser *parser, vector3 pOrigin, std::string name)
  int i;//,state; //Ra: teraz ju¿ nie ma pocz¹tkowego stanu zwrotnicy we wpisie
  std::string token;
 
+ WriteLog(name.c_str());
+
  parser->getTokens();
  *parser >> token;
  str= token.c_str(); //typ toru
+
+ WriteLog(str.c_str());
 
  if (str=="normal")
  {
@@ -455,14 +378,16 @@ void TTrack::Load(cParser *parser, vector3 pOrigin, std::string name)
   parser->getTokens();
   *parser >> token;
   str= token.c_str();   //railtex
-//-  TextureID1=(str=="none"?0:TTexturesManager::GetTextureID(str.c_str(),(iCategoryFlag&1)?Global::iRailProFiltering:Global::iBallastFiltering));
+  WriteLog(str.c_str());
+  TextureID1=(str=="none"?0:TTexturesManager::GetTextureID(stdstrtochar(str), (iCategoryFlag&1)?Global::iRailProFiltering:Global::iBallastFiltering));
   parser->getTokens();
   *parser >> fTexLength; //tex tile length
   if (fTexLength<0.01) fTexLength=4; //Ra: zabezpiecznie przed zawieszeniem
   parser->getTokens();
   *parser >> token;
   str= token.c_str();   //sub || railtex
-//-  TextureID2=(str=="none"?0:TTexturesManager::GetTextureID(str.c_str(),(eType==tt_Normal)?Global::iBallastFiltering:Global::iRailProFiltering));
+  WriteLog(str.c_str());
+  TextureID2=(str=="none"?0:TTexturesManager::GetTextureID(stdstrtochar(str), (eType==tt_Normal)?Global::iBallastFiltering:Global::iRailProFiltering));
   parser->getTokens(3);
   *parser >> fTexHeight1 >> fTexWidth >> fTexSlope;
 
@@ -1348,6 +1273,7 @@ void TTrack::Release()
 
 void TTrack::Render()
 {
+//WriteLog("void TTrack::Render()");
  if (bVisible) //Ra: tory s¹ renderowane sektorami i nie ma sensu ka¿dorazowo liczyæ odleg³oœci
  {
   if (!DisplayListID)
@@ -1357,9 +1283,9 @@ void TTrack::Render()
     ResourceManager::Register(this);
   };
   SetLastUsage(Timer::GetSimulationTime());
-  EnvironmentSet(); //oœwietlenie nie mo¿e byæ skompilowane, bo mo¿e siê zmieniaæ z czasem
+ // EnvironmentSet(); //oœwietlenie nie mo¿e byæ skompilowane, bo mo¿e siê zmieniaæ z czasem
   glCallList(DisplayListID);
-  EnvironmentReset(); //ustawienie oœwietlenia na zwyk³e
+ // EnvironmentReset(); //ustawienie oœwietlenia na zwyk³e
   if (InMovement()) Release(); //zwrotnica w trakcie animacji do odrysowania
  };
 //#ifdef _DEBUG
@@ -1780,7 +1706,7 @@ void  TTrack::RaArrayFill(CVertNormTex *Vert,const CVertNormTex *Start)
 
 void  TTrack::RaRenderVBO(int iPtr)
 {//renderowanie z u¿yciem VBO
- EnvironmentSet();
+ //-EnvironmentSet();
  int seg;
  int i;
  switch (iCategoryFlag&15)
