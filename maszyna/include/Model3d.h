@@ -43,10 +43,6 @@ public:
     {
         r=g=b=V;
     };
- // TMaterialColor(char R, char G, char B)
- // {
- //  r=R; g=G; b=B;
- // };
  // TMaterialColor(double R, double G, double B)
     TMaterialColor(char R, char G, char B)
     {
@@ -131,12 +127,13 @@ enum TAnimType //rodzaj animacji
  at_IK11=0x101, //odwrotna kinematyka - submodel nadrzêdny do sterowango (np. stopa)
  at_IK21=0x102, //odwrotna kinematyka - submodel nadrzêdny do sterowango (np. podudzie)
  at_IK22=0x103, //odwrotna kinematyka - submodel nadrzêdny do nadrzêdnego sterowango (np. udo)
- at_Undefined=0x800000FF //animacja chwilowo nieokreœlona
+ at_Undefined=0x800000FF, //animacja chwilowo nieokreœlona
+ at_Digital = 0x200, //dziesiêciocyfrowy licznik mechaniczny (z cylindrami)
+ at_DigiClk = 0x201 //zegar cyfrowy jako licznik na dziesiêcioœcianach
 };
 
 class TModel3d;
 class TSubModelInfo;
-
 
 class TSubModel
 {//klasa submodelu - pojedyncza siatka, punkt œwietlny albo grupa punktów
@@ -248,9 +245,9 @@ public:
  void SetTranslate(vector3 vNewTransVector);
  void SetTranslate(float3 vNewTransVector);
  void SetRotateIK1(float3 vNewAngles);
+ TSubModel* GetFromName(std::string search,bool i=true); //TODO: TE DWIE FUNKCJE POWINNY BYC ODKOMENTOWANE!
+ TSubModel* GetFromName2(std::string search, bool i = true);
  //TSubModel* GetFromName(std::string search,bool i=true);
- //TSubModel* GetFromName(char *search,bool i=true);
- TSubModel* GetFromName(std::string search);
  void RenderDL();
  void RenderAlphaDL();
  void RenderVBO();
@@ -332,6 +329,7 @@ public:
  inline TSubModel* GetSMRoot() {return(Root);};
  //double Radius; //Ra: nie u¿ywane
  TModel3d();
+ //TModel3d(char *FileName);
  ~TModel3d();
  TSubModel* GetFromName(const char *sName);
  //TMaterial* GetMaterialFromName(char *sName);

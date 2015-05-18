@@ -1,13 +1,11 @@
 //---------------------------------------------------------------------------
+// float3d.cpp is equal with 1166
 
-//#include <vcl.h>
 #pragma hdrstop
 
 #include "float3d.h"
 
 //---------------------------------------------------------------------------
-
-#pragma package(smart_init)
 
 void __fastcall float4x4::Quaternion(float4 *q)
 {//konwersja kwaternionu obrotu na macierz obrotu

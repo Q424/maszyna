@@ -37,14 +37,14 @@ public: //McZapkie: potrzebuje do kiwania na boki
  void OnCursorMove(double x, double y);
  void Update();
  vector3 GetDirection();
- //vector3 inline __fastcall GetCrossPos() { return Pos+GetDirection()*CrossDist+CrossPos; };
+ //vector3 inline GetCrossPos() { return Pos+GetDirection()*CrossDist+CrossPos; };
 
- bool __fastcall SetMatrix();
- void __fastcall SetCabMatrix(vector3 &p);
- void __fastcall RaLook();
- void __fastcall Stop();
+ bool SetMatrix();
+ void SetCabMatrix(vector3 &p);
+ void RaLook();
+ void Stop();
 
- //bool __fastcall GetMatrix(matrix4x4 &Matrix);
+ //bool GetMatrix(matrix4x4 &Matrix);
  vector3 PtNext, PtPrev;
 };
 #endif

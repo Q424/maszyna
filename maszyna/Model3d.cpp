@@ -4,8 +4,9 @@
     Copyright (C) 2001-2004  Marcin Wozniak, Maciej Czapkiewicz and others
 
 */
+// model3d.cpp is equal with 1166
 
-//#pragma hdrstop
+#pragma hdrstop
 
 #include "Model3d.h"
 #include "Usefull.h"
@@ -391,8 +392,8 @@ int TSubModel::Load(cParser& parser,TModel3d *Model,int Pos,bool dynamic)
     texture.insert(0,Global::asCurrentTexturePath.c_str());
 
    //WriteLogSS("TEXTURE:", texture);
-   //TextureID=TTexturesManager::GetTextureID(szTexturePath,Global::asCurrentTexturePath.c_str(),texture);
-   TextureID =  TTexturesManager::GetTextureID(stdstrtochar(texture), false);
+   TextureID=TTexturesManager::GetTextureID(szTexturePath,stdstrtochar(Global::asCurrentTexturePath.c_str()),texture);
+   //--TextureID =  TTexturesManager::GetTextureID(stdstrtochar(texture), false);
 
    if (Opacity==1.0) //przezroczystoœæ z tekstury brana tylko dla Opacity 0!
    iFlags|=TTexturesManager::GetAlpha(TextureID)?0x20:0x10; //0x10-nieprzezroczysta, 0x20-przezroczysta
@@ -848,14 +849,48 @@ struct ToLower
 };
 
 
-
-TSubModel* TSubModel::GetFromName(std::string search)
+/*
+TSubModel* TSubModel::GetFromName(std::string search , bool i)
 {
 	TSubModel* result;
 	//std::transform(search.begin(),search.end(),search.begin(),ToLower());
 	search = ToLowerCase(search); // search.LowerCase();
 	
 	if (search == asName) return this;
+	if (Next)
+	{
+		result = Next->GetFromName(search);
+		if (result) return result;
+	}
+	if (Child)
+	{
+		result = Child->GetFromName(search);
+		if (result) return result;
+	}
+	return NULL;
+};
+*/
+// ------
+
+TSubModel* __fastcall TSubModel::GetFromName(std::string search, bool i)
+{
+	return GetFromName2(search.c_str(), i);
+};
+
+TSubModel* __fastcall TSubModel::GetFromName2(std::string search, bool i)
+{
+	TSubModel* result;
+	//std::transform(search.begin(),search.end(),search.begin(),ToLower());
+	//search=search.LowerCase();
+	//AnsiString name=AnsiString();
+	search = ToLowerCase(search); // search.LowerCase();
+
+	if (pName && search.c_str())
+		if ((i ? stricmp(pName, search.c_str()) : strcmp(pName, search.c_str())) == 0)
+			return this;
+		else
+			if (pName == search)
+				return this; //oba NULL
 	if (Next)
 	{
 		result = Next->GetFromName(search);

@@ -1,4 +1,5 @@
 //---------------------------------------------------------------------------
+// logs.cpp is equal with 1166
 
 #pragma hdrstop
 #include "commons.h"

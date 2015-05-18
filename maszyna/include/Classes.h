@@ -23,7 +23,7 @@ class TEventLauncher;
 class TTraction; //drut
 class TTractionPowerSource; //zasilanie drutów
 class TSky;
-
+class TButton;
 class TMoverParameters;
 namespace _mover
 {

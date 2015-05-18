@@ -1,9 +1,7 @@
 //---------------------------------------------------------------------------
-
+// segment.cpp is equal with 1166
 
 #pragma hdrstop
-
-//#include "opengl/glut.h"
 
 #include "commons.h"
 #include "commons_usr.h"
@@ -324,8 +322,11 @@ vector3 TSegment::FastGetPoint(double t)
  return (bCurve?RaInterpolate(t):((1.0-t)*Point1+(t)*Point2));
 }
 
+//void TSegment::RenderLoft(const vector6 *ShapePoints, int iNumShapePoints,
+ //       double fTextureLength, int iSkip, int iQualityFactor)
+//TODO: cialo tej funkcji nie jest z 1166!!!!
 void TSegment::RenderLoft(const vector6 *ShapePoints, int iNumShapePoints,
-        double fTextureLength, int iSkip, int iQualityFactor)
+     double fTextureLength, int iSkip, int iQualityFactor, vector3 **p, bool bRender)
 {//generowanie trójk¹tów dla odcinka trajektorii ruchu
  //standardowo tworzy triangle_strip dla prostego albo ich zestaw dla ³uku
  //po modyfikacji - dla ujemnego (iNumShapePoints) w dodatkowych polach tabeli

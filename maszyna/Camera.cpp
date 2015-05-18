@@ -1,10 +1,13 @@
-#pragma hdrstop
+//---------------------------------------------------------------------------
+// camera.cpp is equal with 1166
 
-#include "commons.h"
-#include "commons_usr.h"
-#include "camera.h"
-//#include "Timer.h"
-//#include "mover.h"
+#pragma hdrstop
+#include "Camera.h"
+#include "Usefull.h"
+#include "Globals.h"
+#include "Timer.h"
+#include "mover.h"
+#include "Console.h"
 //---------------------------------------------------------------------------
 
 //TViewPyramid TCamera::OrgViewPyramid;
@@ -12,14 +15,12 @@
 
 const vector3 OrgCrossPos= vector3(0,-10,0);
 
-
-
-
-void __fastcall TCamera::Init(vector3 NPos, vector3 NAngle)
+void TCamera::Init(vector3 NPos, vector3 NAngle)
 {
 
     pOffset= vector3(-0.0,0,0);
     vUp= vector3(0,1,0);
+//    pOffset= vector3(-0.8,0,0);
     CrossPos= OrgCrossPos;
     CrossDist= 10;
     Velocity=vector3(0,0,0);
@@ -34,7 +35,7 @@ void __fastcall TCamera::Init(vector3 NPos, vector3 NAngle)
 //    Type= tp_Free;
 };
 
-void __fastcall TCamera::OnCursorMove(double x, double y)
+void TCamera::OnCursorMove(double x, double y)
 {
 //McZapkie-170402: zeby mysz dzialala zawsze    if (Type==tp_Follow)
  Pitch+=y;
@@ -50,14 +51,14 @@ void __fastcall TCamera::OnCursorMove(double x, double y)
  }
 }
 
-void __fastcall TCamera::Update()
+void TCamera::Update()
 {
     //ABu: zmiana i uniezaleznienie predkosci od FPS
     double a= (Console::Pressed(VK_SHIFT)?5.00:1.00);
     if (Console::Pressed(VK_CONTROL))
-     a=a*100; 
+     a=a*100;
 //    OldVelocity=Velocity;
-    if (Global::bFreeFlyModeFlag==true)
+	if (Global::bFreeFlyModeFlag == true)
       Type=tp_Free;
     else
       Type=tp_Follow;
@@ -65,6 +66,36 @@ void __fastcall TCamera::Update()
     {
         if (Console::Pressed(Global::Keys[k_MechUp]))   Velocity.y+=a;
         if (Console::Pressed(Global::Keys[k_MechDown])) Velocity.y-=a;
+//McZapkie-170402: zeby nie bylo konfliktow
+/*
+        if (Console::Pressed(VkKeyScan('d')))
+            Velocity.x+= a*Timer::GetDeltaTime();
+        if (Console::Pressed(VkKeyScan('a')))
+            Velocity.x-= a*Timer::GetDeltaTime();
+        if (Console::Pressed(VkKeyScan('w')))
+            Velocity.z-= a*Timer::GetDeltaTime();
+        if (Console::Pressed(VkKeyScan('s')))
+            Velocity.z+= a*Timer::GetDeltaTime();
+
+        if (Console::Pressed(VK_NUMPAD4) || Console::Pressed(VK_NUMPAD7) || Console::Pressed(VK_NUMPAD1))
+            Yaw+= +1*M_PI*Timer::GetDeltaTime();
+
+        if (Console::Pressed(VK_NUMPAD6) || Console::Pressed(VK_NUMPAD9) || Console::Pressed(VK_NUMPAD3))
+            Yaw+= -1*M_PI*Timer::GetDeltaTime();
+
+        if (Pressed(VK_NUMPAD2) || Console::Pressed(VK_NUMPAD1) || Console::Pressed(VK_NUMPAD3))
+            Pitch+= -1*M_PI*Timer::GetDeltaTime();
+
+        if (Console::Pressed(VK_NUMPAD8) || Console::Pressed(VK_NUMPAD7) || Console::Pressed(VK_NUMPAD9))
+            Pitch+= +1*M_PI*Timer::GetDeltaTime();
+        if (Console::Pressed(VkKeyScan('.')))
+            Roll+= -1*M_PI*Timer::GetDeltaTime();
+        if (Console::Pressed(VkKeyScan(',')))
+            Roll+= +1*M_PI*Timer::GetDeltaTime();
+
+        if (Console::Pressed(VK_NUMPAD5))
+            Pitch=Roll= 0.0f;
+*/
 
 //McZapkie-170402: poruszanie i rozgladanie we free takie samo jak w follow
         if (Console::Pressed(Global::Keys[k_MechRight]))    Velocity.x+=a;
@@ -80,7 +111,7 @@ void __fastcall TCamera::Update()
 //    matrix4x4 mat;
         vector3 Vec=Velocity;
         Vec.RotateY(Yaw);
-		Pos = Pos + Vec*glfwGetTime(); //Timer::GetDeltaRenderTime(); //czas bez pauzy
+        Pos=Pos+Vec*Timer::GetDeltaRenderTime(); //czas bez pauzy
         Velocity=Velocity/2; //p³ynne hamowanie ruchu
 //    double tmp= 10*DeltaTime;
 //        Velocity+= -Velocity*10 * Timer::GetDeltaTime();//( tmp<1 ? tmp : 1 );
@@ -89,9 +120,8 @@ void __fastcall TCamera::Update()
 
 }
 
-vector3 __fastcall TCamera::GetDirection()
+vector3 TCamera::GetDirection()
 {
-
     matrix4x4 mat;
     vector3 Vec;
     Vec= vector3(0,0,1);
@@ -100,10 +130,9 @@ vector3 __fastcall TCamera::GetDirection()
     return (Normalize(Vec));
 }
 
-//bool __fastcall TCamera::GetMatrix(matrix4x4 &Matrix)
-bool __fastcall TCamera::SetMatrix()
+//bool TCamera::GetMatrix(matrix4x4 &Matrix)
+bool TCamera::SetMatrix()
 {
-
     glRotated(-Roll*180.0f/M_PI,0,0,1); //po wy³¹czeniu tego krêci siê pojazd, a sceneria nie
     glRotated(-Pitch*180.0f/M_PI,1,0,0);
     glRotated(-Yaw*180.0f/M_PI,0,1,0); //w zewnêtrznym widoku: kierunek patrzenia
@@ -131,9 +160,8 @@ bool __fastcall TCamera::SetMatrix()
     return true;
 }
 
-void __fastcall TCamera::SetCabMatrix(vector3 &p)
+void TCamera::SetCabMatrix(vector3 &p)
 {//ustawienie widoku z kamery bez przesuniêcia robionego przez OpenGL - nie powinno tak trz¹œæ
-
  glRotated(-Roll*180.0f/M_PI,0,0,1);
  glRotated(-Pitch*180.0f/M_PI,1,0,0);
  glRotated(-Yaw*180.0f/M_PI,0,1,0); //w zewnêtrznym widoku: kierunek patrzenia
@@ -141,9 +169,8 @@ void __fastcall TCamera::SetCabMatrix(vector3 &p)
   gluLookAt(Pos.x-p.x,Pos.y-p.y,Pos.z-p.z,LookAt.x-p.x,LookAt.y-p.y,LookAt.z-p.z,vUp.x,vUp.y,vUp.z); //Ra: pOffset is zero
 }
 
-void __fastcall TCamera::RaLook()
+void TCamera::RaLook()
 {//zmiana kierunku patrzenia - przelicza Yaw
-
  vector3 where=LookAt-Pos+vector3(0,3,0); //trochê w górê od szyn
  if ((where.x!=0.0)||(where.z!=0.0))
   Yaw=atan2(-where.x,-where.z); //k¹t horyzontalny
@@ -152,9 +179,8 @@ void __fastcall TCamera::RaLook()
   Pitch=asin(where.y/l); //k¹t w pionie
 };
 
-void __fastcall TCamera::Stop()
+void TCamera::Stop()
 {//wy³¹cznie bezw³adnego ruchu po powrocie do kabiny
-
  Type=tp_Follow;
  Velocity=vector3(0,0,0);
 };

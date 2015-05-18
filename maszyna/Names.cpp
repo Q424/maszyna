@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
+// names.cpp is equal with 1166
 
-//#include <vcl.h>
 #pragma hdrstop
 #include "commons.h"
 #include "commons_usr.h"
@@ -8,7 +8,6 @@
 
 //---------------------------------------------------------------------------
 
-#pragma package(smart_init)
 /*
 Moduł zarządzający plikami oraz wyszukiwaniem obiektów wg nazw.
 1. Ma przydzielony z góry (EU07.INI) obszar pamięci (rzędu 16MB).

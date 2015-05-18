@@ -4,6 +4,7 @@
     Copyright (C) 2001-2004  Marcin Wozniak, Maciej Czapkiewicz and others
 
 */
+// realsound.cpp is equal with 1166
 
 #pragma hdrstop
 #include "commons.h"
@@ -14,7 +15,8 @@
 
 using namespace std;
 
-TRealSound::TRealSound() {
+TRealSound::TRealSound() 
+{
   pSound = NULL;
   dSoundAtt = -1;
   AM = 0.0;
@@ -30,32 +32,38 @@ TRealSound::TRealSound() {
   bLoopPlay = false; // dźwięk wyłączony
 }
 
-TRealSound::~TRealSound() {
+TRealSound::~TRealSound() 
+{
   // if (this) if (pSound) pSound->Stop();
 }
 
-void TRealSound::Free() {}
-
-void TRealSound::Init(char *SoundName, double DistanceAttenuation, double X, double Y, double Z, bool Dynamic, bool freqmod, 
-	                                                                                                           double rmin)
+void TRealSound::Free()
 {
+}
+
+void TRealSound::Init(char *SoundName, double DistanceAttenuation, double X, double Y, double Z, bool Dynamic, bool freqmod, double rmin)
+{
+	WriteLogSS("SOUND: " + chartostdstr(SoundName), " INFO");
   // Nazwa=SoundName; //to tak raczej nie zadziała, (SoundName) jest tymczasowe
   pSound = TSoundsManager::GetFromName(SoundName, Dynamic, &fFrequency);
-  if (pSound) {
+  if (pSound) 
+  {
     if (freqmod)
-      if (fFrequency != 22050.0) { // dla modulowanych nie może być zmiany
-                                   // mnożnika, bo częstotliwość w nagłówku byłą
-                                   // ignorowana, a mogła być inna niż 22050
+      if (fFrequency != 22050.0)
+	  { // dla modulowanych nie może być zmiany mnożnika, bo częstotliwość w nagłówku byłą ignorowana, a mogła być inna niż 22050
         fFrequency = 22050.0;
         WriteLogSS("Bad sound: " + chartostdstr(SoundName) + ", as modulated, should have 22.05kHz in header", "ERROR");
       }
     AM = 1.0;
     pSound->SetVolume(DSBVOLUME_MIN);
-  } else { // nie ma dźwięku, to jest wysyp
+  } 
+  else 
+  { // nie ma dźwięku, to jest wysyp
     AM = 0;
 	WriteLogSS("Missed sound: " + chartostdstr(SoundName), "ERROR");
   }
-  if (DistanceAttenuation > 0.0) {
+  if (DistanceAttenuation > 0.0) 
+  {
     dSoundAtt = DistanceAttenuation * DistanceAttenuation;
     vSoundPosition.x = X;
     vSoundPosition.y = Y;
@@ -66,44 +74,48 @@ void TRealSound::Init(char *SoundName, double DistanceAttenuation, double X, dou
     dSoundAtt = -1;
 };
 
-double TRealSound::ListenerDistance(vector3 ListenerPosition) {
-  if (dSoundAtt == -1) {
+
+double TRealSound::ListenerDistance(vector3 ListenerPosition) 
+{
+  if (dSoundAtt == -1) 
+  {
     return 0.0;
-  } else {
+  }
+  else 
+  {
     return SquareMagnitude(ListenerPosition - vSoundPosition);
   }
 }
 
 void TRealSound::Play(long Volume, int Looping, bool ListenerInside,  vector3 NewPosition) // Volume BYLO double
 {
-  if (!pSound)
-    return;
+  if (!pSound) return;
   long int vol;
   double dS;
   // double Distance;
   DWORD stat;
-  if ((Global::bSoundEnabled) && (AM != 0)) {
+  if ((Global::bSoundEnabled) && (AM != 0)) 
+  {
     if (Volume > 1.0)
       Volume = 1;
     fPreviousDistance = fDistance;
     fDistance = 0.0; //??
-    if (dSoundAtt > 0.0) {
+    if (dSoundAtt > 0.0) 
+	{
       vSoundPosition = NewPosition;
       dS = dSoundAtt; //*dSoundAtt; //bo odleglosc podawana w kwadracie
       fDistance = ListenerDistance(Global::pCameraPosition);
       if (ListenerInside) // osłabianie dźwięków z odległością
         Volume = Volume * long(dS) / long(dS + fDistance);
       else
-        Volume = Volume * long(dS) /
-                 long(dS + 2 * fDistance); // podwójne dla ListenerInside=false
+        Volume = Volume * long(dS) / long(dS + 2 * fDistance); // podwójne dla ListenerInside=false
     }
     if (iDoppler) //
     { // Ra 2014-07: efekt Dopplera nie zawsze jest wskazany
       // if (FreeFlyModeFlag) //gdy swobodne latanie - nie sprawdza się to
       fPreviousDistance = fDistance; // to efektu Dopplera nie będzie
     }
-    if (Looping) // dźwięk zapętlony można wyłączyć i zostanie włączony w miarę
-                 // potrzeby
+    if (Looping) // dźwięk zapętlony można wyłączyć i zostanie włączony w miarę potrzeby
       bLoopPlay = true; // dźwięk wyłączony
     // McZapkie-010302 - babranie tylko z niezbyt odleglymi dźwiękami
     if ((dSoundAtt == -1) || (fDistance < 20.0 * dS)) {
@@ -147,14 +159,17 @@ void TRealSound::Play(long Volume, int Looping, bool ListenerInside,  vector3 Ne
   }
 };
 
-void TRealSound::Start(){// włączenie dźwięku
+void TRealSound::Start()
+{// włączenie dźwięku
 
 };
 
-void TRealSound::Stop() {
+void TRealSound::Stop() 
+{
   DWORD stat;
   if (pSound)
-    if ((Global::bSoundEnabled) && (AM != 0)) {
+    if ((Global::bSoundEnabled) && (AM != 0)) 
+	{
       bLoopPlay = false; // dźwięk wyłączony
       pSound->GetStatus(&stat);
       if (stat & DSBSTATUS_PLAYING)
@@ -162,12 +177,12 @@ void TRealSound::Stop() {
     }
 };
 
-void TRealSound::AdjFreq(double Freq,
-                         double dt) // McZapkie TODO: dorobic tu efekt Dopplera
+void TRealSound::AdjFreq(double Freq, double dt) // McZapkie TODO: dorobic tu efekt Dopplera
 // Freq moze byc liczba dodatnia mniejsza od 1 lub wieksza od 1
 {
   double df, Vlist;
-  if ((Global::bSoundEnabled) && (AM != 0)) {
+  if ((Global::bSoundEnabled) && (AM != 0)) 
+  {
     if (dt > 0)
     // efekt Dopplera
     {
@@ -175,7 +190,8 @@ void TRealSound::AdjFreq(double Freq,
       df = Freq * (1 + Vlist / 299.8);
     } else
       df = Freq;
-    if (Timer::GetSoundTimer()) {
+    if (Timer::GetSoundTimer()) 
+	{
       df = fFrequency * df; // TODO - brac czestotliwosc probkowania z wav
       pSound->SetFrequency(
           (df < DSBFREQUENCY_MIN
@@ -186,36 +202,41 @@ void TRealSound::AdjFreq(double Freq,
 
 double TRealSound::GetWaveTime() // McZapkie: na razie tylko dla 22KHz/8bps
 { // używana do pomiaru czasu dla dźwięków z początkiem i końcem
-  if (!pSound)
-    return 0.0;
+  if (!pSound) return 0.0;
   double WaveTime;
   DSBCAPS caps;
   caps.dwSize = sizeof(caps);
   pSound->GetCaps(&caps);
   WaveTime = caps.dwBufferBytes;
-  return WaveTime / fFrequency; //(pSound->);  // wielkosc w bajtach przez
-                                //czestotliwosc probkowania
+  return WaveTime / fFrequency; //(pSound->);  // wielkosc w bajtach przez czestotliwosc probkowania
 }
 
-void TRealSound::SetPan(int Pan) { pSound->SetPan(Pan); }
+void TRealSound::SetPan(int Pan) 
+{
+	pSound->SetPan(Pan); 
+}
 
-int TRealSound::GetStatus() {
+int TRealSound::GetStatus()
+{
   DWORD stat;
-  if ((Global::bSoundEnabled) && (AM != 0)) {
+  if ((Global::bSoundEnabled) && (AM != 0)) 
+  {
     pSound->GetStatus(&stat);
     return stat;
-  } else
+  } 
+  else
     return 0;
 }
 
-void TRealSound::ResetPosition() {
+void TRealSound::ResetPosition() 
+{
   if (pSound) // Ra: znowu jakiś badziew!
     pSound->SetCurrentPosition(0);
 }
 
 template<typename T>
-std::string removeSubstrs(basic_string<T>& s,
-	const basic_string<T>& p) {
+std::string removeSubstrs(basic_string<T>& s, const basic_string<T>& p) 
+{
 	basic_string<T>::size_type n = p.length();
 
 	for (basic_string<T>::size_type i = s.find(p);
@@ -236,6 +257,7 @@ void TTextSound::Init(char *SoundName, double SoundAttenuation, double X, double
 
  txt =  removeSubstrs(txt, fext);
 
+ 
 // struct stat info;
 // int ret = -1;
 
@@ -266,29 +288,29 @@ void TTextSound::Init(char *SoundName, double SoundAttenuation, double X, double
 void TTextSound::Play(long Volume, int Looping, bool ListenerInside,  vector3 NewPosition) // Volume BYLO double
 {
 	// TODO: Q komentuje 
-	/* 
-  if (!asText.IsEmpty()) { // jeśli ma powiązany tekst
+	/*
+  if (!asText.empty()) { // jeśli ma powiązany tekst
     DWORD stat;
     pSound->GetStatus(&stat);
     if (!(stat & DSBSTATUS_PLAYING)) // jeśli nie jest aktualnie odgrywany
     {
       int i;
-      AnsiString t = asText;
+      std::string t = asText;
       do { // na razie zrobione jakkolwiek, docelowo przenieść teksty do tablicy
            // nazw
-        i = t.Pos("\r"); // znak nowej linii
+        i = t.find("\r"); // znak nowej linii
         if (!i)
           Global::tranTexts.Add(t.c_str(), fTime, true);
         else {
-          Global::tranTexts.Add(t.SubString(1, i - 1).c_str(), fTime, true);
-          t.Delete(1, i);
-          while (t.IsEmpty() ? false : (unsigned char)(t[1]) < 33)
-            t.Delete(1, 1);
+          Global::tranTexts.Add(t.substr(1, i - 1).c_str(), fTime, true);
+          t.erase(1, i);
+          while (t.empty() ? false : (unsigned char)(t[1]) < 33)
+            t.erase(1, 1);
         }
       } while (i > 0);
     }
   }
-  */
+ */
   TRealSound::Play(Volume, Looping, ListenerInside, NewPosition);
 };
 

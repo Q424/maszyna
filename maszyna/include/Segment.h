@@ -45,9 +45,11 @@ private:
  double GetTFromS(double s);
  vector3 RaInterpolate(double t);
  vector3 RaInterpolate0(double t);
+ //TSegment *segNeightbour[2]; //s¹siednie odcinki - musi byæ przeniesione z Track
+ //int iNeightbour[2]; //do którego koñca doczepiony
 public:
  bool bCurve;
- //int iShape; //Ra: flagi kszta³tu dadz¹ wiêcej mo¿liwoœci optymalizacji
+ //int iShape; //Ra: flagi kszta³tu dadz¹ wiêcej mo¿liwoœci optymalizacji (0-Bezier,1-prosty,2/3-³uk w lewo/prawo,6/7-przejœciowa w lewo/prawo)
  TSegment(TTrack *owner);
  ~TSegment();
  bool Init(vector3 NewPoint1,vector3 NewPoint2,double fNewStep,
@@ -75,10 +77,9 @@ public:
  {//pobranie przechy³ek (do generowania trójk¹tów)
   r1=fRoll1; r2=fRoll2;
  }
- void RenderLoft(const vector6 *ShapePoints,int iNumShapePoints,
-  double fTextureLength,int iSkip=0,int iQualityFactor=1);
- void RenderSwitchRail(const vector6 *ShapePoints1,const vector6 *ShapePoints2,
-  int iNumShapePoints,double fTextureLength,int iSkip=0,double fOffsetX=0.0f);
+ void RenderLoft(const vector6 *ShapePoints, int iNumShapePoints, double fTextureLength, int iSkip = 0, int iQualityFactor = 1, vector3 **p = NULL, bool bRender = true);
+ //void RenderLoft(const vector6 *ShapePoints,int iNumShapePoints, double fTextureLength,int iSkip=0,int iQualityFactor=1);
+ void RenderSwitchRail(const vector6 *ShapePoints1,const vector6 *ShapePoints2, int iNumShapePoints,double fTextureLength,int iSkip=0,double fOffsetX=0.0f);
  void Render();
  inline double GetLength() {return fLength;};
  void MoveMe(vector3 pPosition)
@@ -90,10 +91,8 @@ public:
   }
  }
  int RaSegCount() {return fTsBuffer?iSegCount:1;};
- void RaRenderLoft(CVertNormTex* &Vert,const vector6 *ShapePoints,int iNumShapePoints,
-  double fTextureLength,int iSkip=0,int iEnd=0,double fOffsetX=0.0);
- void RaAnimate(CVertNormTex* &Vert,const vector6 *ShapePoints,int iNumShapePoints,
-  double fTextureLength,int iSkip=0,int iEnd=0,double fOffsetX=0.0);
+ void RaRenderLoft(CVertNormTex* &Vert,const vector6 *ShapePoints,int iNumShapePoints, double fTextureLength,int iSkip=0,int iEnd=0,double fOffsetX=0.0);
+ void RaAnimate(CVertNormTex* &Vert,const vector6 *ShapePoints,int iNumShapePoints, double fTextureLength,int iSkip=0,int iEnd=0,double fOffsetX=0.0);
  void AngleSet(int i,double a) {fAngle[i]=a;};
  void Rollment(double w1,double w2); //poprawianie przechy³ki
 };

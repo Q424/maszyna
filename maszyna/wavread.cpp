@@ -6,6 +6,7 @@
 //
 // Copyright (c) 1999 Microsoft Corp. All rights reserved.
 //-----------------------------------------------------------------------------
+// wavread.cpp is equal with 1166
 
 #include "commons.h"
 #include "commons_usr.h"
@@ -13,26 +14,18 @@
 //-----------------------------------------------------------------------------
 // Defines, constants, and global variables
 //-----------------------------------------------------------------------------
-#define SAFE_DELETE(p)                                                         \
-  {                                                                            \
-    if (p) {                                                                   \
-      delete (p);                                                              \
-      (p) = NULL;                                                              \
-    }                                                                          \
-  }
-#define SAFE_RELEASE(p)                                                        \
-  {                                                                            \
-    if (p) {                                                                   \
-      (p)->Release();                                                          \
-      (p) = NULL;                                                              \
-    }                                                                          \
-  }
+#define SAFE_DELETE(p)  { if(p) { delete (p);     (p)=NULL; } }
+#define SAFE_RELEASE(p) { if(p) { (p)->Release(); (p)=NULL; } }
+
+
+
 
 //-----------------------------------------------------------------------------
 // Name: ReadMMIO()
 // Desc: Support function for reading from a multimedia I/O stream
 //-----------------------------------------------------------------------------
-HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) {
+HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) 
+{
   MMCKINFO ckIn;               // chunk info. for general use.
   PCMWAVEFORMAT pcmWaveFormat; // Temp PCM structure to load in.
 
@@ -62,14 +55,17 @@ HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) {
 
   // Allocate the waveformatex, but if its not pcm format, read the next
   // word, and thats how many extra bytes to allocate.
-  if (pcmWaveFormat.wf.wFormatTag == WAVE_FORMAT_PCM) {
+  if (pcmWaveFormat.wf.wFormatTag == WAVE_FORMAT_PCM) 
+  {
     if (NULL == (*ppwfxInfo = new WAVEFORMATEX))
       return E_FAIL;
 
     // Copy the bytes from the pcm structure to the waveformatex structure
     memcpy(*ppwfxInfo, &pcmWaveFormat, sizeof(pcmWaveFormat));
     (*ppwfxInfo)->cbSize = 0;
-  } else {
+  } 
+  else 
+  {
     // Read in length of extra bytes.
     WORD cbExtraBytes = 0L;
     if (mmioRead(hmmioIn, (CHAR *)&cbExtraBytes, sizeof(WORD)) != sizeof(WORD))
@@ -86,7 +82,8 @@ HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) {
     // Now, read those extra bytes into the structure, if cbExtraAlloc != 0.
     if (mmioRead(hmmioIn,
                  (CHAR *)(((BYTE *)&((*ppwfxInfo)->cbSize)) + sizeof(WORD)),
-                 cbExtraBytes) != cbExtraBytes) {
+                 cbExtraBytes) != cbExtraBytes) 
+	{
       delete *ppwfxInfo;
       *ppwfxInfo = NULL;
       return E_FAIL;
@@ -94,7 +91,8 @@ HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) {
   }
 
   // Ascend the input file out of the 'fmt ' chunk.
-  if (0 != mmioAscend(hmmioIn, &ckIn, 0)) {
+  if (0 != mmioAscend(hmmioIn, &ckIn, 0)) 
+  {
     delete *ppwfxInfo;
     *ppwfxInfo = NULL;
     return E_FAIL;
@@ -110,15 +108,16 @@ HRESULT ReadMMIO(HMMIO hmmioIn, MMCKINFO *pckInRIFF, WAVEFORMATEX **ppwfxInfo) {
 //       successful, the error code if not.
 //-----------------------------------------------------------------------------
 HRESULT WaveOpenFile(CHAR *strFileName, HMMIO *phmmioIn,
-                     WAVEFORMATEX **ppwfxInfo, MMCKINFO *pckInRIFF) {
+                     WAVEFORMATEX **ppwfxInfo, MMCKINFO *pckInRIFF) 
+{
   HRESULT hr;
   HMMIO hmmioIn = NULL;
 
-  if (NULL ==
-      (hmmioIn = mmioOpen(strFileName, NULL, MMIO_ALLOCBUF | MMIO_READ)))
+  if (NULL == (hmmioIn = mmioOpen(strFileName, NULL, MMIO_ALLOCBUF | MMIO_READ)))
     return E_FAIL;
 
-  if (FAILED(hr = ReadMMIO(hmmioIn, pckInRIFF, ppwfxInfo))) {
+  if (FAILED(hr = ReadMMIO(hmmioIn, pckInRIFF, ppwfxInfo))) 
+  {
     mmioClose(hmmioIn, 0);
     return hr;
   }
@@ -127,6 +126,8 @@ HRESULT WaveOpenFile(CHAR *strFileName, HMMIO *phmmioIn,
 
   return S_OK;
 }
+
+
 
 //-----------------------------------------------------------------------------
 // Name: WaveStartDataRead()
@@ -161,7 +162,8 @@ HRESULT WaveStartDataRead(HMMIO *phmmioIn, MMCKINFO *pckIn,
 //          cbActualRead - # of bytes actually read.
 //-----------------------------------------------------------------------------
 HRESULT WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE *pbDest, MMCKINFO *pckIn,
-                     UINT *cbActualRead) {
+                     UINT *cbActualRead) 
+{
   MMIOINFO mmioinfoIn; // current status of <hmmioIn>
 
   *cbActualRead = 0;
@@ -175,9 +177,11 @@ HRESULT WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE *pbDest, MMCKINFO *pckIn,
 
   pckIn->cksize -= cbDataIn;
 
-  for (DWORD cT = 0; cT < cbDataIn; cT++) {
+  for (DWORD cT = 0; cT < cbDataIn; cT++)
+  {
     // Copy the bytes from the io to the buffer.
-    if (mmioinfoIn.pchNext == mmioinfoIn.pchEndRead) {
+    if (mmioinfoIn.pchNext == mmioinfoIn.pchEndRead) 
+	{
       if (0 != mmioAdvance(hmmioIn, &mmioinfoIn, MMIO_READ))
         return E_FAIL;
 
@@ -201,22 +205,32 @@ HRESULT WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE *pbDest, MMCKINFO *pckIn,
 // Name: CWaveSoundRead()
 // Desc: Constructs the class
 //-----------------------------------------------------------------------------
-CWaveSoundRead::CWaveSoundRead() { m_pwfx = NULL; }
+CWaveSoundRead::CWaveSoundRead()
+{ 
+	m_pwfx = NULL; 
+}
+
+
 
 //-----------------------------------------------------------------------------
 // Name: ~CWaveSoundRead()
 // Desc: Destructs the class
 //-----------------------------------------------------------------------------
-CWaveSoundRead::~CWaveSoundRead() {
+CWaveSoundRead::~CWaveSoundRead() 
+{
   Close();
   SAFE_DELETE(m_pwfx);
 }
+
+
+
 
 //-----------------------------------------------------------------------------
 // Name: Open()
 // Desc: Opens a wave file for reading
 //-----------------------------------------------------------------------------
-HRESULT CWaveSoundRead::Open(CHAR *strFilename) {
+HRESULT CWaveSoundRead::Open(CHAR *strFilename) 
+{
   SAFE_DELETE(m_pwfx);
 
   HRESULT hr;
@@ -230,29 +244,42 @@ HRESULT CWaveSoundRead::Open(CHAR *strFilename) {
   return hr;
 }
 
+
+
+
 //-----------------------------------------------------------------------------
 // Name: Reset()
 // Desc: Resets the internal m_ckIn pointer so reading starts from the
 //       beginning of the file again
 //-----------------------------------------------------------------------------
-HRESULT CWaveSoundRead::Reset() {
+HRESULT CWaveSoundRead::Reset() 
+{
   return WaveStartDataRead(&m_hmmioIn, &m_ckIn, &m_ckInRiff);
 }
+
+
+
 
 //-----------------------------------------------------------------------------
 // Name: Read()
 // Desc: Reads a wave file into a pointer and returns how much read
 //       using m_ckIn to determine where to start reading from
 //-----------------------------------------------------------------------------
-HRESULT CWaveSoundRead::Read(UINT nSizeToRead, BYTE *pbData, UINT *pnSizeRead) {
+HRESULT CWaveSoundRead::Read(UINT nSizeToRead, BYTE *pbData, UINT *pnSizeRead) 
+{
   return WaveReadFile(m_hmmioIn, nSizeToRead, pbData, &m_ckIn, pnSizeRead);
 }
+
+
+
+
 
 //-----------------------------------------------------------------------------
 // Name: Close()
 // Desc: Closes an open wave file
 //-----------------------------------------------------------------------------
-HRESULT CWaveSoundRead::Close() {
+HRESULT CWaveSoundRead::Close() 
+{
   mmioClose(m_hmmioIn, 0);
   return S_OK;
 }

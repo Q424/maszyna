@@ -5,7 +5,7 @@
     Copyright (C) 2001-2004  Marcin Wozniak and others
 
 */
-
+// trackfollower.cpp is equal with 1166
 
 #pragma hdrstop
 #include "commons.h"
@@ -40,25 +40,58 @@ bool TTrackFollower::Init(TTrack *pTrack,TDynamicObject *NewOwner,double fDir)
  return true;
 }
 
-void TTrackFollower::SetCurrentTrack(TTrack *pTrack,int end)
+TTrack* TTrackFollower::SetCurrentTrack(TTrack *pTrack, int end)
 {//przejechanie na inny odcinkek toru, z ewentualnym rozpruciem
- if (pTrack?pTrack->eType==tt_Switch:false) //jeœli zwrotnica, to przek³adamy j¹, aby uzyskaæ dobry segment
- {int i=(end?pCurrentTrack->iNextDirection:pCurrentTrack->iPrevDirection);
-  if (i>0) //je¿eli wjazd z ostrza
-   pTrack->SwitchForced(i>>1,Owner); //to prze³o¿enie zwrotnicy - rozprucie!
- }
- if (!pTrack)
- {//gdy nie ma toru w kierunku jazdy
-  //if (pCurrentTrack->iCategoryFlag&1) //jeœli tor kolejowy
-   pTrack=pCurrentTrack->NullCreate(end); //tworzenie toru wykolej¹cego na przed³u¿eniu pCurrentTrack
- }
- else
- {//najpierw +1, póŸniej -1, aby odcinek izolowany wspólny dla tych torów nie wykry³ zera
-  pTrack->AxleCounter(+1,Owner); //zajêcie nowego toru
-  if (pCurrentTrack) pCurrentTrack->AxleCounter(-1,Owner); //opuszczenie tamtego toru
- }
- pCurrentTrack=pTrack;
- pCurrentSegment=(pCurrentTrack?pCurrentTrack->CurrentSegment():NULL);
+	if (pTrack)
+		switch (pTrack->eType)
+	{
+		case tt_Switch: //jeœli zwrotnica, to przek³adamy j¹, aby uzyskaæ dobry segment
+		{int i = (end ? pCurrentTrack->iNextDirection : pCurrentTrack->iPrevDirection);
+		if (i>0) //je¿eli wjazd z ostrza
+			pTrack->SwitchForced(i >> 1, Owner); //to prze³o¿enie zwrotnicy - rozprucie!
+		}
+		break;
+		case tt_Cross: //skrzy¿owanie trzeba tymczasowo prze³¹czyæ, aby wjechaæ na w³aœciwy tor
+		{
+	//TODO:--iSegment = Owner->RouteWish(pTrack); //nr segmentu zosta³ ustalony podczas skanowania
+		//Ra 2014-08: aby ustaliæ dalsz¹ trasê, nale¿y zapytaæ AI - trasa jest ustalana podczas skanowania
+		//Ra 15-01: zapytanie AI nie wybiera segmentu - kolejny skanuj¹cy mo¿e przestawiæ
+		//pTrack->CrossSegment(end?pCurrentTrack->iNextDirection:pCurrentTrack->iPrevDirection,i); //ustawienie w³aœciwego wskaŸnika
+		//powinno zwracaæ kierunek do zapamiêtania, bo segmenty mog¹ mieæ ró¿ny kierunek
+		//if fDirection=(iSegment>0)?1.0:-1.0; //kierunek na tym segmencie jest ustalany bezpoœrednio
+		if (iSegment == 0)
+		{//to jest b³êdna sytuacja - generuje pêtle zawracaj¹ce za skrzy¿owaniem - ustaliæ, kiedy powstaje!
+			iSegment = 1; //doraŸna poprawka
+		}
+		if ((end ? iSegment : -iSegment)<0)
+			fDirection = -fDirection; //wtórna zmiana
+		pTrack->SwitchForced(abs(iSegment) - 1, NULL); //wybór zapamiêtanego segmentu
+		}
+		break;
+	}
+	if (!pTrack)
+	{//gdy nie ma toru w kierunku jazdy
+		pTrack = pCurrentTrack->NullCreate(end); //tworzenie toru wykolej¹cego na przed³u¿eniu pCurrentTrack
+		if (!end) //jeœli dodana od strony zero, to zmiana kierunku
+			fDirection = -fDirection; //wtórna zmiana
+		//if (pTrack->iCategoryFlag&2)
+		//{//jeœli samochód, zepsuæ na miejscu
+		// Owner->MoverParameters->V=0; //zatrzymaæ
+		// Owner->MoverParameters->Power=0; //ukraœæ silnik
+		// Owner->MoverParameters->AccS=0; //wch³on¹æ moc
+		// Global::iPause|=1; //zapauzowanie symulacji
+		//}
+	}
+	else
+	{//najpierw +1, póŸniej -1, aby odcinek izolowany wspólny dla tych torów nie wykry³ zera
+		pTrack->AxleCounter(+1, Owner); //zajêcie nowego toru
+		if (pCurrentTrack) pCurrentTrack->AxleCounter(-1, Owner); //opuszczenie tamtego toru
+	}
+	pCurrentTrack = pTrack;
+	pCurrentSegment = (pCurrentTrack ? pCurrentTrack->CurrentSegment() : NULL);
+	if (!pCurrentTrack)
+		Error(Owner->MoverParameters->Name + " at NULL track");
+	return pCurrentTrack;
 };
 
 bool TTrackFollower::Move(double fDistance,bool bPrimary)

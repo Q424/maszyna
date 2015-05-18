@@ -1,4 +1,4 @@
-// EQUAL WITH PATTERN - 
+// parser.cpp is EQUAL WITH 1166
 #define _USE_OLD_RW_STL
 
 #include "parser.h"

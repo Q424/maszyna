@@ -9,11 +9,10 @@
 #include "model3d.h"
 #include "float3d.h"
 
-//#include "parser.h"
-class TModel3d;
-class TObject3d;
 
 const int iMaxNumLights=8;
+class TAnimContainer;
+class TEvent;
 
 //typy stanu œwiate³
 typedef enum {
@@ -53,29 +52,36 @@ private:
  //dla kinematyki odwróconej u¿ywane s¹ kwaterniony
  float fLength; //d³ugoœæ koœci dla IK
  int iAnim; //animacja: +1-obrót Eulera, +2-przesuw, +4-obrót kwaternionem, +8-IK
+ //+0x80000000: animacja z eventem, wykonywana poza wyœwietlaniem
  //+0x100: pierwszy stopieñ IK - obróciæ w stronê pierwszego potomnego (dziecka)
  //+0x200: drugi stopieñ IK - dostosowaæ do pozycji potomnego potomnego (wnuka)
  union
  {//mog¹ byæ animacje klatkowe ró¿nego typu, wskaŸniki u¿ywa AnimModel
   TAnimVocaloidFrame *pMovementData; //wskaŸnik do klatki
  };
+ TEvent *evDone; //ewent wykonywany po zakoñczeniu animacji, np. zapór, obrotnicy
 public:
  TAnimContainer *pNext;
+ TAnimContainer *acAnimNext; //lista animacji z eventem, które musz¹ byæ przeliczane równie¿ bez wyœwietlania
  TAnimContainer();
  ~TAnimContainer();
  bool Init(TSubModel *pNewSubModel);
  //std::string inline GetName() { return std::string(pSubModel?pSubModel->asName.c_str():""); };
  //std::string inline GetName() { return std::string(pSubModel?pSubModel->pName:""); };
-//- char* NameGet() {return (pSubModel?pSubModel->pName:NULL);};
+ char* NameGet(); // {return (pSubModel ? pSubModel->pName : NULL); };
  //void SetRotateAnim(vector3 vNewRotateAxis, double fNewDesiredAngle, double fNewRotateSpeed, bool bResetAngle=false);
  void SetRotateAnim(vector3 vNewRotateAngles, double fNewRotateSpeed);
  void SetTranslateAnim(vector3 vNewTranslate, double fNewSpeed);
  void AnimSetVMD(double fNewSpeed);
+ void PrepareModel();
  void UpdateModel();
  void UpdateModelIK();
  bool InMovement(); //czy w trakcie animacji?
- double AngleGet() {return vRotateAngles.z;}; //jednak ostatnia, T3D ma inny uk³ad
-//- void WillBeAnimated() {if (pSubModel) pSubModel->WillBeAnimated();};
+ double _fastcall AngleGet() {return vRotateAngles.z;}; //jednak ostatnia, T3D ma inny uk³ad
+ vector3 _fastcall TransGet() {return vector3(-vTranslation.x,vTranslation.z,vTranslation.y);}; //zmiana, bo T3D ma inny uk³ad
+ void WillBeAnimated(); //{if (pSubModel) pSubModel->WillBeAnimated(); };
+ void EventAssign(TEvent *ev);
+ TEvent* Event() {return evDone;};
 };
 
 class TAnimAdvanced
@@ -109,12 +115,16 @@ private:
  TLightState lsLights[iMaxNumLights];
  float fDark; //poziom zapalanie œwiat³a (powinno byæ chyba powi¹zane z danym œwiat³em?)
  float fOnTime,fOffTime; //by³y sta³ymi, teraz mog¹ byæ zmienne dla ka¿dego egzemplarza
+private:
+ void RaAnimate(); //przeliczenie animacji egzemplarza
+ void RaPrepare(); //ustawienie animacji egzemplarza na wzorcu
 public:
  GLuint ReplacableSkinId[5]; //McZapkie-020802: zmienialne skory
+ static TAnimContainer *acAnimList; //lista animacji z eventem, które musz¹ byæ przeliczane równie¿ bez wyœwietlania
  TAnimModel();
  ~TAnimModel();
  bool Init(TModel3d *pNewModel);
- bool Init(std::string asName, std::string asReplacableTexture);
+ bool Init(std::string asName,std::string asReplacableTexture);
  bool Load(cParser *parser, bool ter=false);
  TAnimContainer* AddContainer(char *pName);
  TAnimContainer* GetContainer(char *pName);
@@ -126,7 +136,6 @@ public:
  void RenderAlphaDLq(vector3* vPosition);
  void RenderVBO(vector3* vPosition);
  void RenderAlphaVBO(vector3* vPosition);
- void RaPrepare();
  int Flags();
  void RaAnglesSet(double a,double b,double c)
  {vAngle.x=a; vAngle.y=b; vAngle.z=c;};
@@ -136,7 +145,9 @@ public:
  void TerrainRenderVBO(int n);
  void AnimationVND(void* pData, double a, double b, double c, double d);
  void LightSet(int n,float v);
+ static void AnimUpdate(double dt);
 };
+//--TAnimContainer *TAnimModel::acAnimList=NULL;
 
 //---------------------------------------------------------------------------
 #endif

@@ -1,4 +1,5 @@
 //---------------------------------------------------------------------------
+// timer.cpp is equal with 1166
 
 
 #pragma hdrstop
@@ -16,32 +17,56 @@ double fSimulationTime = 0;
 double fSoundTimer = 0;
 double fSinceStart = 0;
 
-double GetTime() { return fSimulationTime; }
 
-double GetDeltaTime() { // czas symulacji (stoi gdy pauza)
+
+double GetTime() 
+{ 
+	return fSimulationTime; 
+}
+
+double GetDeltaTime() 
+{ // czas symulacji (stoi gdy pauza)
   return DeltaTime;
 }
 
-double GetDeltaRenderTime() { // czas renderowania (do poruszania się)
+double GetDeltaRenderTime() 
+{ // czas renderowania (do poruszania się)
   return DeltaRenderTime;
 }
 
-double GetfSinceStart() { return fSinceStart; }
+double GetfSinceStart() 
+{ 
+	return fSinceStart; 
+}
 
-void SetDeltaTime(double t) { DeltaTime = t; }
+void SetDeltaTime(double t) 
+{ 
+	DeltaTime = t; 
+}
 
-double GetSimulationTime() { return fSimulationTime; }
+double GetSimulationTime() 
+{ 
+	return fSimulationTime; 
+}
 
-void SetSimulationTime(double t) { fSimulationTime = t; }
+void SetSimulationTime(double t) 
+{ 
+	fSimulationTime = t; 
+}
 
-bool GetSoundTimer() { // Ra: być może, by dźwięki nie modyfikowały się zbyt
+bool GetSoundTimer() 
+{ // Ra: być może, by dźwięki nie modyfikowały się zbyt
                        // często, po 0.1s zeruje się ten licznik
   return (fSoundTimer == 0.0f);
 }
 
-double GetFPS() { return fFPS; }
+double GetFPS() 
+{ 
+	return fFPS; 
+}
 
-void ResetTimers() {
+void ResetTimers() 
+{
   // double CurrentTime=
   GetTickCount();
   DeltaTime = 0.1;
@@ -51,11 +76,13 @@ void ResetTimers() {
 
 LONGLONG fr, count, oldCount;
 // LARGE_INTEGER fr,count;
-void UpdateTimers(bool pause) {
+void UpdateTimers(bool pause) 
+{
   QueryPerformanceFrequency((LARGE_INTEGER *)&fr);
   QueryPerformanceCounter((LARGE_INTEGER *)&count);
   DeltaRenderTime = double(count - oldCount) / double(fr);
-  if (!pause) {
+  if (!pause) 
+  {
     DeltaTime = Global::fTimeSpeed * DeltaRenderTime;
     fSoundTimer += DeltaTime;
     if (fSoundTimer > 0.1)

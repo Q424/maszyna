@@ -1,7 +1,7 @@
 #ifndef _commons_usr_H_
 #define _commons_usr_H_
 
-#include "Classes.h"
+#include "Classes.h"          //+
 #include "dumb3d.h"           //+
 #include "Usefull.h"
 #include "sysinfo.h"          
@@ -39,14 +39,21 @@
 #include "AnimModel.h"        //+
 #include "DynObj.h"         
 #include "Model3d.h"          //+
-#include "Traction.h"
+#include "Traction.h"         //+
 #include "Flags.h"
-#include "float3d.h"
+#include "float3d.h"          //+
 #include "MdlMngr.h"          //+
-#include "object3d.h"
-#include "mtable.h"         //+
+#include "mtable.h"           //+
+#include "mover.h"            //+
 //#include "driver.h"  
 #include "evlaunch.h"         //+
 #include "memcell.h"          //+
 #include "event.h"            //+
+#include "tractionpower.h"    //+
+#include "button.h"           //+
+#include "spring.h"           //+
+#include "gauge.h"            //+
+#include "aircoupler.h"       //+
+#include "mover.h"   
+//#include "textureb.h"  
 #endif 

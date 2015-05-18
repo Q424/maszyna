@@ -1,7 +1,9 @@
+// ResourceManager.cpp is equal with 1166
+
 #include "ResourceManager.h"
 #include "Logs.h"
 
-#include <sstream>
+//#include <sstream>
 
 ResourceManager::Resources ResourceManager::_resources;
 double ResourceManager::_expiry = 5.0f;

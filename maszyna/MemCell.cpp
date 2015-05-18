@@ -5,7 +5,7 @@
     Copyright (C) 2001-2004  Marcin Wozniak, Maciej Czapkiewicz and others
 
 */
-// memcell.cpp is equal with pattern
+// memcell.cpp is equal with 1166
 //TODO: memcell.cpp
 #pragma hdrstop
 

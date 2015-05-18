@@ -30,6 +30,307 @@
 #define DTOR (PI/180.0f)
 #define SQR(x) (x*x)
 
+
+// ********************************************************************************************************************
+// PONIZSZE BYLO W MOVER.H
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TLocation
+{
+	double X;
+	double Y;
+	double Z;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TRotation
+{
+	double Rx;
+	double Ry;
+	double Rz;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TDimension
+{
+	double W;
+	double L;
+	double H;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TCommand
+{
+	std::string Command;
+	double Value1;
+	double Value2;
+	TLocation Location;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TTrackShape
+{
+	double R;
+	double Len;
+	double dHtrack;
+	double dHrail;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TTrackParam
+{
+	double Width;
+	double friction;
+	int CategoryFlag;// bylo int
+	int QualityFlag;// bylo int
+	int DamageFlag;// bylo int
+	double Velmax;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TTractionParam
+{
+	double TractionVoltage;
+	double TractionFreq;
+	double TractionMaxCurrent;
+	double TractionResistivity;
+};
+
+
+enum TCouplerType { NoCoupler, Articulated, Bare, Chain, Screw, Automatic };
+
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TCoupling
+{
+	double SpringKB;
+	double SpringKC;
+	double beta;
+	double DmaxB;
+	double FmaxB;
+	double DmaxC;
+	double FmaxC;
+	TCouplerType CouplerType;
+	int CouplingFlag; // bylo int
+	int AllowedFlag; // bylo int
+	bool Render;
+	double CoupleDist;
+	TMoverParameters* Connected; // BYLY 2 **
+	int ConnectedNr;  // bylo int
+	double CForce;
+	double Dist;
+	bool CheckCollision;
+};
+
+typedef TCoupling TCouplers[2];
+//typedef int TCouplerNr[2];//ABu: nr sprzegu z ktorym polaczony
+
+
+enum TBrakeSystem { Individual, Pneumatic, ElectroPneumatic };
+enum TBrakeSubsystem { ss_None, ss_W, ss_K, ss_KK, ss_Hik, ss_ESt, ss_KE, ss_LSt, ss_MT, ss_Dako };
+enum TBrakeValve { NoValve, W, W_Lu_VI, W_Lu_L, W_Lu_XR, K, Kg, Kp, Kss, Kkg, Kkp, Kks, Hikg1, Hikss, Hikp1, KE, SW, EStED, NESt3, ESt3, LSt, ESt4, ESt3AL2, EP1, EP2, M483, CV1_L_TR, CV1, CV1_R, Other };
+enum TBrakeHandle { NoHandle, West, FV4a, M394, M254, FVel1, FVel6, D2, Knorr, FD1, BS2, testH, St113 };
+//typy hamulcow indywidualnych
+enum TLocalBrake { NoBrake, ManualBrake, PneumaticBrake, HydraulicBrake };
+
+typedef double TBrakeDelayTable[4];
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TBrakePressure
+{
+	double PipePressureVal;
+	double BrakePressureVal;
+	double FlowSpeedVal;
+	TBrakeSystem BrakeType;
+};
+
+typedef TBrakePressure TBrakePressureTable[13];
+
+enum TEngineTypes { None, Dumb, WheelsDriven, ElectricSeriesMotor, DieselEngine, SteamEngine, DieselElectric };
+enum TPowerType { NoPower, BioPower, MechPower, ElectricPower, SteamPower };
+enum TFuelType { Undefined, Coal, Oil };
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TGrateType
+{
+	TFuelType FuelType;
+	double GrateSurface;
+	double FuelTransportSpeed;
+	double IgnitionTemperature;
+	double MaxTemperature;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TBoilerType
+{
+	double BoilerVolume;
+	double BoilerHeatSurface;
+	double SuperHeaterSurface;
+	double MaxWaterVolume;
+	double MinWaterVolume;
+	double MaxPressure;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TCurrentCollector
+{
+	double MinH;
+	double MaxH;
+	double CSW;
+	double MinV;
+	double MaxV;
+	double InsetV;
+	double MinPress;
+	double MaxPress;
+};
+
+enum TPowerSource {
+	NotDefined, InternalSource, Transducer, Generator, Accumulator, CurrentCollector,
+	PowerCable, Heater
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TPowerParameters
+{
+	double MaxVoltage;
+	double MaxCurrent;
+	double IntR;
+	TPowerSource SourceType;
+	union
+	{
+		struct
+		{
+			TGrateType Grate;
+			TBoilerType Boiler;
+
+		};
+		struct
+		{
+			TPowerType PowerTrans;
+			double SteamPressure;
+
+		};
+		struct
+		{
+			int CollectorsNo;
+			TCurrentCollector CollectorParameters;
+
+		};
+		struct
+		{
+			double MaxCapacity;
+			TPowerSource RechargeSource;
+
+		};
+		struct
+		{
+			TEngineTypes GeneratorEngine;
+
+		};
+		struct
+		{
+			double InputVoltage;
+
+		};
+		struct
+		{
+			TPowerType PowerType;
+
+		};
+
+	};
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TScheme
+{
+	int Relay;
+	double R;
+	int Bn;
+	int Mn;
+	bool AutoSwitch;
+	int ScndAct;
+};
+
+typedef TScheme TSchemeTable[65];
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TDEScheme
+{
+	double RPM;
+	double GenPower;
+	double Umax;
+	double Imax;
+};
+
+typedef TDEScheme TDESchemeTable[33];
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TShuntScheme
+{
+	double Umin;
+	double Umax;
+	double Pmin;
+	double Pmax;
+};
+
+typedef TShuntScheme TShuntSchemeTable[33];
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TMPTRelay
+{
+	double Iup;
+	double Idown;
+};
+
+typedef TMPTRelay TMPTRelayTable[8];
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TMotorParameters
+{
+	double mfi;
+	double mIsat;
+	double fi;
+	double Isat;
+	bool AutoSwitch;
+};
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+struct TSecuritySystem
+{
+	int SystemType;
+	double AwareDelay;
+	double SoundSignalDelay;
+	double EmergencyBrakeDelay;
+	int Status;
+	double SystemTimer;
+	double SystemSoundTimer;
+	double SystemBrakeTimer;
+	int VelocityAllowed;
+	int NextVelocityAllowed;
+	bool RadioStop;
+};
+
+struct mover__2
+{
+	int NToothM;
+	int NToothW;
+	double Ratio;
+};
+
+
+
+
+enum TProblem //lista problemów taboru, które uniemo¿liwiaj¹ jazdê
+{//flagi bitowe
+	pr_Hamuje = 1, //pojazd ma za³¹czony hamulec lub zatarte osie
+	pr_Pantografy = 2, //pojazd wymaga napompowania pantografów
+	pr_Ostatni = 0x80000000 //ostatnia flaga bitowa
+};
+
+
+
+// ***************************************************************************************************************************************
+
 typedef struct {
 	float x, y, z;
 	unsigned int color;
@@ -257,6 +558,7 @@ public:
 	static bool bJoinEvents; //czy grupowaæ eventy o tych samych nazwach
 	static bool DebugModeFlag;
 	static bool bLogFPHeaders;
+	static bool bSmoothTraction;
 
 	static int iHiddenEvents; //czy ³¹czyæ eventy z torami poprzez nazwê toru
 	static int iSlowMotion;
@@ -296,6 +598,7 @@ public:
 	static std::string asTerrainModel; //nazwa obiektu terenu do zapisania w pliku
 	static std::string asCurrentTexturePath;
 	static TAnimModel *pTerrainCompact; //obiekt terenu do ewentualnego zapisania w pliku
+
 
 	static int iModifyTGA;
 	static int iTextures;

@@ -1,3 +1,5 @@
+// texturedds.cpp is equal with 1166
+
 #include "TextureDDS.h"
 
 void DxtcReadColors(const GLubyte* Data, Color8888* result)
@@ -36,7 +38,8 @@ void DxtcReadColor(GLushort Data, Color8888* Out)
 
 void DecompressDXT1(DDS_IMAGE_DATA lImage, const GLubyte *lCompData, GLubyte *Data)
 {
-	GLuint		x, y, i, j, k, Select;
+	GLuint		x, y, i, j, k;
+	GLuint		Select;
 	const GLubyte		*Temp;
 	Color8888	colours[4], *col;
 	GLushort	color_0, color_1;
@@ -168,7 +171,8 @@ void DecompressDXT3(DDS_IMAGE_DATA lImage, const GLubyte *lCompData, GLubyte *Da
 
 void DecompressDXT5(DDS_IMAGE_DATA lImage, const GLubyte *lCompData, GLubyte *Data)
 {
-	GLuint		x, y,  i, j, k, Select;
+	GLuint		x, y,  i, j, k;
+	GLuint		Select;
 	const GLubyte		*Temp; //, r0, g0, b0, r1, g1, b1;
 	Color8888	colours[4], *col;
 	GLuint		bitmask, Offset;

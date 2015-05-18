@@ -1,3 +1,12 @@
+//---------------------------------------------------------------------------
+
+/*
+MaSzyna EU07 locomotive simulator
+Copyright (C) 2001-2004  Marcin Wozniak and others
+
+*/
+// sound.cpp is equal with 1166
+
 #pragma hdrstop
 
 #define STRICT
@@ -47,8 +56,8 @@ TSoundContainer::TSoundContainer( LPDIRECTSOUND8 pDS8, char *Directory, char *st
       return;
       WriteLogSS("Missed sound: strFileName", "?");
     }
-
-  strcpy_s(Name, strFileName);
+  ToLowerCase(strFileName);
+  strcpy_s(Name, strFileName); 
 
   // Set up the direct sound buffer, and only request the flags needed
   // since each requires some overhead and limits if the buffer can
@@ -56,11 +65,9 @@ TSoundContainer::TSoundContainer( LPDIRECTSOUND8 pDS8, char *Directory, char *st
   DSBUFFERDESC dsbd;
   ZeroMemory(&dsbd, sizeof(DSBUFFERDESC));
   dsbd.dwSize = sizeof(DSBUFFERDESC);
-  dsbd.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME |
-                 DSBCAPS_CTRLFREQUENCY;
+  dsbd.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLPAN | DSBCAPS_CTRLVOLUME |  DSBCAPS_CTRLFREQUENCY;
  // if (!Global::bInactivePause) // jeśli przełączony w tło ma nadal działać
-    dsbd.dwFlags |= DSBCAPS_GLOBALFOCUS; // to dźwięki mają być również
-                                         // słyszalne
+    dsbd.dwFlags |= DSBCAPS_GLOBALFOCUS; // to dźwięki mają być również słyszalne
   dsbd.dwBufferBytes = pWaveSoundRead->m_ckIn.cksize;
   dsbd.lpwfxFormat = pWaveSoundRead->m_pwfx;
   fSamplingRate = float(pWaveSoundRead->m_pwfx->nSamplesPerSec);
@@ -82,6 +89,7 @@ TSoundContainer::TSoundContainer( LPDIRECTSOUND8 pDS8, char *Directory, char *st
   dwBufferBytes = dsbd.dwBufferBytes;
 
   //----------------------------------------------------------
+
 
   BYTE *pbWavData; // Pointer to actual wav data
   UINT cbWavSize;  // Size of data
@@ -143,14 +151,16 @@ TSoundContainer::~TSoundContainer() {
   //    for (int i=Concurrent-1; i>=0; i--)
   //        SAFE_RELEASE( pDSBuffer[i] );
   //    free(pDSBuffer);
-  while (!DSBuffers.empty()) {
+  while (!DSBuffers.empty()) 
+  {
     SAFE_RELEASE(DSBuffers.top());
     DSBuffers.pop();
   }
   SafeDelete(Next);
 };
 
-LPDIRECTSOUNDBUFFER TSoundContainer::GetUnique(LPDIRECTSOUND8 pDS8) {
+LPDIRECTSOUNDBUFFER TSoundContainer::GetUnique(LPDIRECTSOUND8 pDS8) 
+{
   if (!DSBuffer)
     return NULL;
   // jeśli się dobrze zainicjowało
@@ -161,15 +171,19 @@ LPDIRECTSOUNDBUFFER TSoundContainer::GetUnique(LPDIRECTSOUND8 pDS8) {
   return DSBuffers.top();
 };
 
-TSoundsManager::~TSoundsManager() { Free(); };
+TSoundsManager::~TSoundsManager() 
+{ 
+	Free(); 
+};
 
-void TSoundsManager::Free() {
+void TSoundsManager::Free()
+{
   SafeDelete(First);
   SAFE_RELEASE(pDS8);
 };
 
-TSoundContainer *TSoundsManager::LoadFromFile(char *Dir, char *Name,
-                                              int Concurrent) {
+TSoundContainer *TSoundsManager::LoadFromFile(char *Dir, char *Name,int Concurrent) 
+{
   TSoundContainer *Tmp = First;
   First = new TSoundContainer(pDS8, Dir, Name, Concurrent);
   First->Next = Tmp;
@@ -246,19 +260,22 @@ LPDIRECTSOUNDBUFFER TSoundsManager::GetFromName( char *Name, bool Dynamic,  floa
   return (NULL);
 };
 
-void TSoundsManager::RestoreAll() {
+void TSoundsManager::RestoreAll() 
+{
   TSoundContainer *Next = First;
 
   HRESULT hr;
 
   DWORD dwStatus;
 
-  for (int i = 0; i < Count; i++) {
+  for (int i = 0; i < Count; i++) 
+  {
 
    if (FAILED(hr = Next->DSBuffer->GetStatus(&dwStatus))) // TU NA KONCU BYL ;
     //        return hr;
 
-    if (dwStatus & DSBSTATUS_BUFFERLOST) {
+    if (dwStatus & DSBSTATUS_BUFFERLOST)
+	{
       // Since the app could have just been activated, then
       // DirectSound may not be giving us control yet, so
       // the restoring the buffer may fail.

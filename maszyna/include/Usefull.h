@@ -35,7 +35,7 @@
 #define szTexturePath "textures\\"
 //#define szDefaultTextureExt ".dds"
 
-const float M_PI = 3.141592653589793238463;
+const double M_PI = 3.141592653589793238463;
 const double M_PI_2 = 6.2831853;
 const double M_PI_4 = 12.56636;
 

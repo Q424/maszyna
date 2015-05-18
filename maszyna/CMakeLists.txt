@@ -40,12 +40,18 @@ set(MASZYNA_SOURCES
 	model3d.cpp
 	mdlmngr.cpp
 	ground.cpp
-	download.cpp
 	vbo.cpp
 	mtable.cpp
 	evlaunch.cpp
 	memcell.cpp
 	event.cpp
+	traction.cpp
+	spring.cpp
+	button.cpp
+	gauge.cpp
+	tractionpower.cpp
+	friction.cpp
+	hamulce.cpp
 )
 
 set(MASZYNA_HEADERS
@@ -78,6 +84,7 @@ set(MASZYNA_HEADERS
 	include/texture.h
 	include/segment.h
 	include/trackfollower.h
+	include/download.h
 	include/pdownloader.h
 	include/track.h
 	include/classes.h
@@ -90,6 +97,11 @@ set(MASZYNA_HEADERS
 	include/evlaunch.h
 	include/memcell.h
 	include/event.h
+	include/traction.h
+	include/spring.h
+	include/button.h
+	include/gauge.h
+	include/mover.h
 )
 
 set(Q_LIB_DIRS C:\\DEPENDIENCES\\devil)

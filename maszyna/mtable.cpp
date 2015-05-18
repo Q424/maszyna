@@ -1,3 +1,4 @@
+// mtable.cpp is equal with 1166
 #include "commons.h"
 #include "commons_usr.h"
 #include <io.h>
@@ -34,7 +35,7 @@ void TMTableTime::Init(int InitH, int InitM, int InitSRH, int InitSRM, int InitS
 
 void TMTableTime::UpdateMTableTime(double deltaT)
 {
-int xss, xh, xm, xs ;    //dodanie czasu (deltaT) w sekundach, z przeliczeniem godziny
+int xss;    //dodanie czasu (deltaT) w sekundach, z przeliczeniem godziny
 
 mr = mr + deltaT; //dodawanie sekund
 

@@ -74,6 +74,7 @@ bool Global::bDecompressDDS = false; // czy programowa dekompresja DDS
 bool Global::bJoinEvents = false; // czy grupowaæ eventy o tych samych nazwach
 bool Global::DebugModeFlag = false;
 bool Global::bLogFPHeaders = false;
+bool Global::bSmoothTraction = true;
 
 int Global::iHiddenEvents = 0; // czy ³¹czyæ eventy z torami poprzez nazwê toru
 int Global::iSlowMotion = 0; //info o malym FPS: 0-OK, 1-wy³¹czyæ multisampling, 3-promieñ 1.5km, 7-1km
@@ -81,7 +82,7 @@ int Global::iReCompile = 0;
 int Global::iPARSERBYTESPASSED = 0;
 int Global::iNODES = 0;
 int Global::postep = 0;
-int Global::iPause = 0;
+int Global::iPause = 0x10;
 int Global::iTextMode = 0;
 int Global::aspectratio = 43;
 int Global::keyid = 0;
@@ -110,6 +111,7 @@ std::string Global::asLang = "pl";
 std::string Global::asSky = "1";
 std::string Global::asTerrainModel = ""; //nazwa obiektu terenu do zapisania w pliku
 std::string Global::asCurrentTexturePath = std::string(szDefaultTexturePath);
+
 
 int Global::iModifyTGA = 7; // czy korygowaæ pliki TGA dla szybszego wczytywania
 int Global::iTextures = 0; // licznik u¿ytych tekstur

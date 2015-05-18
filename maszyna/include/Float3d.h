@@ -35,7 +35,7 @@ double inline __fastcall float3::Length() const
 {return sqrt(x*x+y*y+z*z);
 };
 inline float3 operator/(const float3& v, double k)
-{return float3(v.x/k,v.y/k,v.z/k);
+{return float3(float(v.x/k), float(v.y/k), float(v.z/k));
 };
 inline float3 SafeNormalize(const float3 &v)
 {//bezpieczna normalizacja (wektor d³ugoœci 1.0)
@@ -82,7 +82,7 @@ inline float4 operator-(const float4 &q1,const float4 &q2)
 inline float4 operator+(const float4 &v1,const float4 &v2)
 {return float4(v1.x+v2.x,v1.y+v2.y,v1.z+v2.z,v1.w+v2.w);};
 inline float4 operator/(const float4& v, double k)
-{return float4(v.x/k,v.y/k,v.z/k,v.w/k);};
+{return float4(float(v.x/k), float(v.y/k), float(v.z/k), float(v.w/k));};
 inline float4 Normalize(const float4 &v)
 {//bezpieczna normalizacja (wektor d³ugoœci 1.0)
  double l=v.LengthSquared();
@@ -99,7 +99,7 @@ inline float Dot(const float4 &q1,const float4 &q2)
 }
 inline float4& operator*=(float4& v1,double d)
 {//mno¿enie przez skalar, jaki ma sens?
- v1.x*=d; v1.y*=d; v1.z*=d; v1.w*=d;
+ v1.x*=float(d); v1.y*=float(d); v1.z*=float(d); v1.w*=float(d);
  return v1;
 };
 inline float4 Slerp(const float4 &q0,const float4 &q1,float t)
@@ -130,10 +130,10 @@ inline float4 Slerp(const float4 &q0,const float4 &q1,float t)
   k1=sin(t*omega)*oneOverSinOmega;
  }
  return float4
-  (q0.x*k0+new_q1.x*k1,
-   q0.y*k0+new_q1.y*k1,
-   q0.z*k0+new_q1.z*k1,
-   q0.w*k0+new_q1.w*k1
+  (float(q0.x*k0+new_q1.x*k1),
+   float(q0.y*k0 + new_q1.y*k1),
+   float(q0.z*k0 + new_q1.z*k1),
+   float(q0.w*k0 + new_q1.w*k1)
   );
 }
 
@@ -206,17 +206,17 @@ inline float4x4& float4x4::Rotation(double angle,float3 axis)
  double xyomc = x * y * omc;
  double xzomc = x * z * omc;
  double yzomc = y * z * omc;
- e[0] =x*x*omc+c;
- e[1] =xyomc+zs;
- e[2] =xzomc-ys;
+ e[0] =float(x*x*omc+c);
+ e[1] =float(xyomc+zs);
+ e[2] =float(xzomc-ys);
  e[3] =0;
- e[4] =xyomc-zs;
- e[5] =y*y*omc+c;
- e[6] =yzomc+xs;
+ e[4] =float(xyomc-zs);
+ e[5] =float(y*y*omc+c);
+ e[6] =float(yzomc+xs);
  e[7] =0;
- e[8] =xzomc+ys;
- e[9] =yzomc-xs;
- e[10]=z*z*omc+c;
+ e[8] =float(xzomc+ys);
+ e[9] =float(yzomc-xs);
+ e[10]=float(z*z*omc+c);
  e[11]=0;
  e[12]=0;
  e[13]=0;

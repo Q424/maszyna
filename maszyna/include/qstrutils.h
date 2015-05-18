@@ -8,6 +8,15 @@
 #include "../commons.h"
 #include "../commons_usr.h"
 
+
+
+class BadConversion : public std::runtime_error {
+public:
+	BadConversion(std::string const& s)
+		: std::runtime_error(s)
+	{ }
+};
+
 // ********************************************************************************************************************
 // Trims both ends
 // ********************************************************************************************************************
@@ -179,6 +188,20 @@ inline char* ftos(float val)
 	return ReturnString;
 }
 */
+
+// *********************************************************************************************
+// ntoss() - KONWERTOWANIE float, double, int DO std::string
+// *********************************************************************************************
+
+template <typename T> std::string ntoss(const T& t) 
+{
+	std::ostringstream os;
+
+	if (!(os << t))
+		throw BadConversion("ntoss(double)");
+	//os << t;
+	return os.str();
+}
 
 // *********************************************************************************************
 // ftoss() - KONWERTOWANIE FLOAT DO std::string

@@ -10,7 +10,7 @@
 
 class TEvent;
 
-typedef enum { tt_Unknown, tt_Normal, tt_Switch, tt_Turn, tt_Cross, tt_Tributary } TTrackType;
+typedef enum { tt_Unknown, tt_Normal, tt_Switch, tt_Table, tt_Cross, tt_Tributary } TTrackType;
 //McZapkie-100502
 typedef enum {e_unknown=-1, e_flat=0, e_mountains, e_canyon, e_tunnel, e_bridge, e_bank} TEnvironmentType;
 //Ra: opracowaæ alternatywny system cieni/œwiate³ z definiowaniem koloru oœwietlenia w halach
@@ -23,30 +23,47 @@ class TTraction;
 class TSwitchExtension
 {//dodatkowe dane do toru, który jest zwrotnic¹
 public:
- TSwitchExtension(TTrack *owner);
+ TSwitchExtension(TTrack *owner,int what);
  ~TSwitchExtension();
- TSegment *Segments[4]; //dwa tory od punktu 1, pozosta³e dwa od 2?
- TTrack *pNexts[2];
- TTrack *pPrevs[2];
- bool iNextDirection[2];
- bool iPrevDirection[2];
+ TSegment *Segments[6]; //dwa tory od punktu 1, pozosta³e dwa od 2? Ra 140101: 6 po³¹czeñ dla skrzy¿owañ
+ //TTrack *trNear[4]; //tory do³¹czone do punktów 1, 2, 3 i 4
+ //dotychczasowe [2]+[2] wskaŸniki zamieniæ na nowe [4]
+ TTrack *pNexts[2]; //tory do³¹czone do punktów 2 i 4
+ TTrack *pPrevs[2]; //tory do³¹czone do punktów 1 i 3
+ int iNextDirection[2]; //to te¿ z [2]+[2] przerobiæ na [4]
+ int iPrevDirection[2];
  int CurrentIndex; //dla zwrotnicy
- double fOffset1, fDesiredOffset1; //ruch od strony punktu 1
+ double fOffset,fDesiredOffset; //aktualne i docelowe po³o¿enie napêdu iglic 
+ double fOffsetSpeed; //prêdkoœæ liniowa ruchu iglic
+ double fOffsetDelay; //opóŸnienie ruchu drugiej iglicy wzglêdem pierwszej
  union
- {double fOffset2, fDesiredOffset2; //ruch od strony punktu 2 nie obs³ugiwany
-  TGroundNode *pMyNode; //dla obrotnicy do wtórnego pod³¹czania torów
- };
- union
- {bool RightSwitch; //czy zwrotnica w prawo
-  //TAnimContainer *pAnim; //animator modelu dla obrotnicy
-  TAnimModel *pModel; //na razie model
+ {
+  struct
+  {//zmienne potrzebne tylko dla zwrotnicy
+   double fOffset1,fOffset2; //przesuniêcia iglic - 0=na wprost
+   bool RightSwitch; //czy zwrotnica w prawo
+  };
+  struct
+  {//zmienne potrzebne tylko dla obrotnicy/przesuwnicy
+   TGroundNode *pMyNode; //dla obrotnicy do wtórnego pod³¹czania torów
+   //TAnimContainer *pAnim; //animator modelu dla obrotnicy
+   TAnimModel *pModel; //na razie model
+  };
+  struct
+  {//zmienne dla skrzy¿owania
+   vector3 *vPoints; //tablica wierzcho³ków nawierzchni, generowana przez pobocze
+   int iPoints; //liczba faktycznie u¿ytych wierzcho³ków nawierzchni
+   bool bPoints; //czy utworzone?
+   int iRoads; //ile dróg siê spotyka?
+  };
  };
  bool bMovement; //czy w trakcie animacji
  int iLeftVBO,iRightVBO; //indeksy iglic w VBO
  TSubRect *pOwner; //sektor, któremu trzeba zg³osiæ animacjê
  TTrack *pNextAnim; //nastêpny tor do animowania
- TEvent *EventPlus,*EventMinus; //zdarzenia sygnalizacji rozprucia
+ TEvent *evPlus,*evMinus; //zdarzenia sygnalizacji rozprucia
  float fVelocity; //maksymalne ograniczenie prêdkoœci (ustawianej eventem)
+ vector3 vTrans; //docelowa translacja przesuwnicy
 private:
 };
 
@@ -55,17 +72,21 @@ const int iMaxNumDynamics=40; //McZapkie-100303
 class TIsolated
 {//obiekt zbieraj¹cy zajêtoœci z kilku odcinków
  int iAxles; //iloœæ osi na odcinkach obs³ugiwanych przez obiekt
- TIsolated *pNext;
- static TIsolated *pRoot;
+ TIsolated *pNext; //odcinki izolowane s¹ trzymane w postaci listy jednikierunkowej
+ static TIsolated *pRoot; //pocz¹tek listy
 public:
  std::string asName; //nazwa obiektu, baza do nazw eventów
- TEvent *eBusy; //zdarzenie wyzwalane po zajêciu grupy
- TEvent *eFree; //zdarzenie wyzwalane po ca³kowitym zwolnieniu zajêtoœci grupy
+ TEvent *evBusy; //zdarzenie wyzwalane po zajêciu grupy
+ TEvent *evFree; //zdarzenie wyzwalane po ca³kowitym zwolnieniu zajêtoœci grupy
+ TMemCell *pMemCell; //automatyczna komórka pamiêci, która wspó³pracuje z odcinkiem izolowanym
  TIsolated();
- TIsolated(const std::string &n, TIsolated *i);
+ TIsolated(const std::string &n,TIsolated *i);
  ~TIsolated();
  static TIsolated* Find(const std::string &n); //znalezienie obiektu albo utworzenie nowego
  void Modify(int i,TDynamicObject *o); //dodanie lub odjêcie osi
+ bool Busy() { return (iAxles>0); };
+ static TIsolated* Root() { return (pRoot); };
+ TIsolated* Next() { return (pNext); };
 };
 
 class TTrack : public Resource
@@ -73,8 +94,8 @@ class TTrack : public Resource
 private:
  TSwitchExtension *SwitchExtension; //dodatkowe dane do toru, który jest zwrotnic¹
  TSegment *Segment;
- TTrack *pNext; //odcinek od strony punktu 2 - to powinno byæ w segmencie
- TTrack *pPrev; //odcinek od strony punktu 1
+ TTrack *trNext; //odcinek od strony punktu 2 - to powinno byæ w segmencie
+ TTrack *trPrev; //odcinek od strony punktu 1
  //McZapkie-070402: dodalem zmienne opisujace rozmiary tekstur
  GLuint TextureID1; //tekstura szyn albo nawierzchni
  GLuint TextureID2; //tekstura automatycznej podsypki albo pobocza
@@ -93,14 +114,12 @@ public:
  int iNumDynamics;
  TDynamicObject *Dynamics[iMaxNumDynamics];
  int iEvents; //Ra: flaga informuj¹ca o obecnoœci eventów
- TEvent *Eventall0;  //McZapkie-140302: wyzwalany gdy pojazd stoi
- TEvent *Eventall1;
- TEvent *Eventall2;
- TEvent *Event0;  //McZapkie-280503: wyzwalany tylko gdy headdriver
- TEvent *Event1;
- TEvent *Event2;
- TEvent *EventBusy; //Ra: wyzwalane, gdy zajmowany; nazwa automatyczna
- TEvent *EventFree; //Ra: wyzwalane, gdy zwalniany; nazwa automatyczna
+ TEvent *evEventall0;  //McZapkie-140302: wyzwalany gdy pojazd stoi
+ TEvent *evEventall1;
+ TEvent *evEventall2;
+ TEvent *evEvent0;  //McZapkie-280503: wyzwalany tylko gdy headdriver
+ TEvent *evEvent1;
+ TEvent *evEvent2;
  std::string asEventall0Name; //nazwy eventów
  std::string asEventall1Name;
  std::string asEventall2Name;
@@ -119,6 +138,8 @@ public:
  int iDamageFlag;
  TEnvironmentType eEnvironment; //dŸwiêk i oœwietlenie
  bool bVisible; //czy rysowany
+ int iAction; //czy modyfikowany eventami (specjalna obs³uga przy skanowaniu)
+ float fOverhead; //informacja o stanie sieci: 0-jazda bezpr¹dowa, >0-z opuszczonym i ograniczeniem prêdkoœci
 private:
  double fVelocity; //prêdkoœæ dla AI (powy¿ej roœnie prawdopowobieñstwo wykolejenia)
 public:
@@ -126,7 +147,9 @@ public:
  double fTrackLength; //d³ugoœæ z wpisu, nigdzie nie u¿ywana
  double fRadius; //promieñ, dla zwrotnicy kopiowany z tabeli
  bool ScannedFlag; //McZapkie: do zaznaczania kolorem torów skanowanych przez AI
- TTraction *pTraction; //drut zasilaj¹cy
+ TTraction *hvOverhead; //drut zasilaj¹cy do szybkiego znalezienia (nie u¿ywany)
+ TGroundNode *nFouling[2]; //wspó³rzêdne ukresu albo oporu koz³a
+ TTrack *trColides; //tor kolizyjny, na którym trzeba sprawdzaæ pojazdy pod k¹tem zderzenia
 
  TTrack(TGroundNode *g);
  ~TTrack();
@@ -140,13 +163,15 @@ public:
  void ConnectNextNext(TTrack *pNewNext,int typ);
  inline double Length() { return Segment->GetLength(); };
  inline TSegment* CurrentSegment() { return Segment; };
- inline TTrack* CurrentNext() {return (pNext);};
- inline TTrack* CurrentPrev() {return (pPrev);};
+ inline TTrack* CurrentNext() {return (trNext);};
+ inline TTrack* CurrentPrev() {return (trPrev);};
+ TTrack* Neightbour(int s,double &d);
  bool SetConnections(int i);
- bool Switch(int i);
+ bool Switch(int i,double t=-1.0,double d=-1.0);
  bool SwitchForced(int i,TDynamicObject *o);
+ int CrossSegment(int from,int into);
  inline int GetSwitchState() { return (SwitchExtension?SwitchExtension->CurrentIndex:-1); };
- void Load(cParser *parser, vector3 pOrigin, std::string name);
+ void Load(cParser *parser, vector3 pOrigin,std::string name);
  bool AssignEvents(TEvent *NewEvent0, TEvent *NewEvent1, TEvent *NewEvent2);
  bool AssignallEvents(TEvent *NewEvent0, TEvent *NewEvent1, TEvent *NewEvent2);
  bool AssignForcedEvents(TEvent *NewEventPlus, TEvent *NewEventMinus);
@@ -164,12 +189,13 @@ public:
  void  RaRenderVBO(int iPtr); //renderowanie z VBO sektora
  void RenderDyn(); //renderowanie nieprzezroczystych pojazdów (oba tryby)
  void RenderDynAlpha(); //renderowanie przezroczystych pojazdów (oba tryby)
+ void RenderDynSounds(); //odtwarzanie dŸwiêków pojazdów jest niezale¿ne od ich wyœwietlania
 
  void RaOwnerSet(TSubRect *o)
  {if (SwitchExtension) SwitchExtension->pOwner=o;};
  bool InMovement(); //czy w trakcie animacji?
  void RaAssign(TGroundNode *gn,TAnimContainer *ac);
- void RaAssign(TGroundNode *gn,TAnimModel *am);
+ void RaAssign(TGroundNode *gn,TAnimModel *am,TEvent *done,TEvent *joined);
  void RaAnimListAdd(TTrack *t);
  TTrack* RaAnimate();
 
@@ -177,7 +203,7 @@ public:
  void AxleCounter(int i,TDynamicObject *o)
  {if (pIsolated) pIsolated->Modify(i,o);}; //dodanie lub odjêcie osi
  std::string IsolatedName();
- bool IsolatedEventsAssign(TEvent *busy, TEvent *free);
+ bool IsolatedEventsAssign(TEvent *busy,TEvent *free);
  double WidthTotal();
  GLuint TextureGet(int i) {return i?TextureID1:TextureID2;};
  bool IsGroupable();
@@ -185,7 +211,8 @@ public:
  void MovedUp1(double dh);
  std::string NameGet();
  void VelocitySet(float v);
- inline float VelocityGet() {return fVelocity;};
+ float VelocityGet();
+ void ConnectionsLog();
 private:
  void EnvironmentSet();
  void EnvironmentReset();

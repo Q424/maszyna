@@ -18,6 +18,46 @@
 // 2015.05.02 terrain loading and render (DL & VBO)
 // 2015.05.02 partial support modules including
 
+/* below the list of modules that are compatible with rev 1166 (EXE EU07_469)
+advsound.cpp =
+aircoupler.cpp =
+animmodel.cpp =
+button.cpp =
+camera.cpp =
+classes.cpp =
+console.cpp =
+event.cpp =
+evlaunch.cpp =
+fadesound.cpp =
+float3d.cpp =
+gauge.cpp =
+ground.cpp =
+logs.cpp =
+mdlmngr.cpp =
+memcell.cpp = 
+model3d.cpp =
+mtable.cpp =
+names.cpp =
+parser.cpp =
+realsound.cpp =
+resourcemanager.cpp =
+segment.cpp =
+sky.cpp =
+sound.cpp =
+spring.cpp =
+texture.cpp =
+texturedds.cpp =
+timer.cpp =
+track.cpp = 
+trackfollower.cpp =
+traction.cpp =
+tractionpower.cpp =
+vbo.cpp =
+wavread.cpp =
+friction.cpp =
+hamulce.cpp =
+
+*/
 // Additional includes:
 // C:\DEPENDIENCES\devil\include
 // C:\DEPENDIENCES\freeimage
@@ -172,12 +212,12 @@ bool  TWorld::Init()
 	
 	Global::szDefaultExt = ".tga";
 
-	Global::bfonttex = TTexturesManager::GetTextureID("font.bmp", 0);  // FOR LOADER
-	Global::fonttexturex = TTexturesManager::GetTextureID("font.bmp", 0);
-	Global::loaderbackg = TTexturesManager::GetTextureID("logo.bmp", 0);
-	Global::logotex = TTexturesManager::GetTextureID("logo.bmp", 0);
-	Global::boxtex = TTexturesManager::GetTextureID("boxtex.bmp", 0);
-	Global::notex = TTexturesManager::GetTextureID("notex.bmp", 0);
+	Global::bfonttex = TTexturesManager::GetTextureID(NULL, NULL, "font.bmp");  // FOR LOADER
+	Global::fonttexturex = TTexturesManager::GetTextureID(NULL, NULL, "font.bmp");
+	Global::loaderbackg = TTexturesManager::GetTextureID(NULL, NULL, "logo.bmp");
+	Global::logotex = TTexturesManager::GetTextureID(NULL, NULL, "logo.bmp");
+	Global::boxtex = TTexturesManager::GetTextureID(NULL, NULL, "boxtex.bmp");
+	Global::notex = TTexturesManager::GetTextureID(NULL, NULL, "notex.bmp");
 
 	Resize(1280, 1024);
 
@@ -273,7 +313,8 @@ bool  TWorld::Init()
 	WriteLog("glEnable(GL_FOG);");
 	glEnable(GL_FOG); // Enables GL_FOG
 
-
+	TButton *BTN = new TButton();
+	TSpring *SPRING = new TSpring();
 
 	//EN_ALPHATEST(true);
 	//EN_DITHER(false);
@@ -316,7 +357,7 @@ bool  TWorld::Init()
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-	Global::CAMERA.Position_Camera(5, 2.5, 13, 0, 2.5, 3, 0, 1, 0);  // Position      View(target)  Up
+	Global::CAMERA.Position_Camera(0, 3.5, 330,   0, 2.0, 336, 0, 1, 0);  // Position      View(target)  Up
 
     RenderLoader(hDC, 77, "SOUND INITIALIZATION...");
 	
@@ -330,6 +371,7 @@ bool  TWorld::Init()
 	//Camera.Reset();
 
 	Global::bManageNodes = false;
+	Global::bLoadTraction = true;
 
 	Ground.Init("td-org.scn", hDC);
 
@@ -347,6 +389,8 @@ bool  TWorld::Init()
 	KeyEvents[8] = Ground.FindEvent("keyctrl08");
 	KeyEvents[9] = Ground.FindEvent("keyctrl09");
 	
+	Timer::ResetTimers();
+
 	Global::bActive = true;
  return true;
 };
@@ -441,6 +485,8 @@ if (!Global::iPause)
  campos.x = Global::CAMERA.mPos.x;
  campos.y = Global::CAMERA.mPos.y;
  campos.z = Global::CAMERA.mPos.z;
+
+ Ground.CheckQuery();
 
  if (!Render(dt, 1)) return false;
 

@@ -5,10 +5,10 @@
     Copyright (C) 2001-2004  Marcin Wozniak and others
 
 */
-// event.cpp is equal with pattern
+// event.cpp is equal with 1166
 // TODO: event.cpp
 #pragma hdrstop
-
+#include <string.h>
 #include "Event.h"
 #include "parser.h"
 #include "Timer.h"
@@ -139,10 +139,10 @@ void TEvent::Conditions(cParser *parser, std::string s) { // przetwarzanie warun
 void TEvent::Load(cParser *parser, vector3 *org) {
   int i;
   int ti;
-  double tf;
+//--  double tf;
   std::string token;
   std::string str;
-  char *ptr;
+//--  char *ptr;
 
   bEnabled =
       true; // zmieniane na false dla eventów używanych do skanowania sygnałów

@@ -38,14 +38,14 @@ private:
  TDynamicObject *Owner; //pojazd posiadaj¹cy
  int iEventFlag; //McZapkie-020602: informacja o tym czy wyzwalac zdarzenie: 0,1,2,3
  int iEventallFlag;
-
+ int iSegment; //który segment toru jest u¿ywany (¿eby nie przeskakiwa³o po przestawieniu zwrotnicy pod taborem)
 public:
  double fOffsetH; //Ra: odleg³oœæ œrodka osi od osi toru (dla samochodów)
  vector3 pPosition; //wspó³rzêdne XYZ w uk³adzie scenerii
  vector3 vAngles; //x:przechy³ka, y:pochylenie, z:kierunek w planie (w radianach)
  TTrackFollower();
  ~TTrackFollower();
- void SetCurrentTrack(TTrack *pTrack,int end);
+ TTrack* SetCurrentTrack(TTrack *pTrack, int end);
  bool Move(double fDistance,bool bPrimary);
  inline TTrack* GetTrack() {return pCurrentTrack;};
  inline double GetRoll() {return vAngles.x;}; //przechy³ka policzona przy ustalaniu pozycji

@@ -5,7 +5,7 @@
     Copyright (C) 2001-2004  Marcin Wozniak and others
 
 */
-// evlaunch.cpp is equal with pattern
+// evlaunch.cpp is equal with 1166
 // TODO: evlaunch.cpp
 
 #pragma hdrstop
@@ -38,11 +38,17 @@ TEventLauncher::TEventLauncher() { // ustawienie początkowych wartości dla
   iCheckMask = 0;
 }
 
-TEventLauncher::~TEventLauncher() { SafeDeleteArray(szText); }
+TEventLauncher::~TEventLauncher() 
+{ 
+	SafeDeleteArray(szText); 
+}
 
-void TEventLauncher::Init() {}
+void TEventLauncher::Init() 
+{
+}
 
-bool TEventLauncher::Load(cParser *parser) { // wczytanie wyzwalacza zdarzeń
+bool TEventLauncher::Load(cParser *parser) 
+{ // wczytanie wyzwalacza zdarzeń
   std::string str;
   std::string token;
   parser->getTokens();
@@ -52,7 +58,8 @@ bool TEventLauncher::Load(cParser *parser) { // wczytanie wyzwalacza zdarzeń
   parser->getTokens(); // klawisz sterujący
   *parser >> token;
   str = std::string(token.c_str());
-  if (str != "none") {
+  if (str != "none") 
+  {
 	  if (str.length() == 1)
 		  iKey = VkKeyScan(str[1]); // jeden znak jest konwertowany na kod klawisza
 	  else
@@ -62,10 +69,9 @@ bool TEventLauncher::Load(cParser *parser) { // wczytanie wyzwalacza zdarzeń
   *parser >> DeltaTime;
   if (DeltaTime < 0)
     DeltaTime = -DeltaTime; // dla ujemnego zmieniamy na dodatni
-  else if (DeltaTime >
-           0) { // wartość dodatnia oznacza wyzwalanie o określonej godzinie
-    iMinute =
-        int(DeltaTime) % 100; // minuty są najmłodszymi cyframi dziesietnymi
+  else if (DeltaTime > 0)
+  { // wartość dodatnia oznacza wyzwalanie o określonej godzinie
+    iMinute = int(DeltaTime) % 100; // minuty są najmłodszymi cyframi dziesietnymi
     iHour = int(DeltaTime - iMinute) / 100; // godzina to setki
     DeltaTime = 0; // bez powtórzeń
     WriteLogSS("EventLauncher at " + itoss(iHour) + ":" + itoss(iMinute), "INFO"); // wyświetlenie czasu
@@ -121,9 +127,11 @@ bool TEventLauncher::Load(cParser *parser) { // wczytanie wyzwalacza zdarzeń
   return true;
 };
 
-bool TEventLauncher::Render() { //"renderowanie" wyzwalacza
+bool TEventLauncher::Render() 
+{ //"renderowanie" wyzwalacza
   bool bCond = false;
-  if (iKey != 0) {
+  if (iKey != 0) 
+  {
     if (Global::bActive) // tylko jeśli okno jest aktywne
       bCond = (Console::Pressed(iKey)); // czy klawisz wciśnięty
   }
@@ -133,7 +141,8 @@ bool TEventLauncher::Render() { //"renderowanie" wyzwalacza
 	{
       UpdatedTime = 0; // naliczanie od nowa
       bCond = true;
-    } else
+    } 
+	else
       UpdatedTime += Timer::GetDeltaTime(); // aktualizacja naliczania czasu
   } 
   else 
@@ -145,7 +154,8 @@ bool TEventLauncher::Render() { //"renderowanie" wyzwalacza
           bCond = true;
         }
       }
-    } else
+    } 
+	else
       UpdatedTime = 1;
   }
   if (bCond) // jeśli spełniony został warunek

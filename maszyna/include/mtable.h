@@ -86,7 +86,7 @@ public:
 	std::string shh;
 	std::string smm;
 	std::string sss;
-	float mr;
+	double mr;
 	double bysec;
 	void UpdateMTableTime(double deltaT);
 	void Init(int InitH, int InitM, int InitSRH, int InitSRM, int InitSSH, int InitSSM);

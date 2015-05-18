@@ -1,46 +1,55 @@
+//---------------------------------------------------------------------------
+
 #ifndef TextureH
 #define TextureH
+#include "../commons.h"
+#include "../commons_usr.h"
+#include <map>
+#include <string>
 
-#include "commons.h"
 
-class TTexture
-{
-public:
-    __fastcall TTexture() { ID=0; Name= NULL; };
-//    __fastcall TTexture(TCHAR* szFileName, TTexture *NNext ) {  ID=0; LoadBMP(szFileName); Next= NNext; };
-    __fastcall TTexture(char* szFileName, TTexture *NNext );
-//    __fastcall ~TTexture() { glDeleteTextures(1,&ID); SafeDeleteArray(Name); };
-    bool inline __fastcall Allocated() { return(ID>0); };
-    bool __fastcall LoadTargaFile( char* strPathname );
-    bool __fastcall LoadBMP(char* szFileName);
-	bool __fastcall LoadBUM(char* szFileName);
-    bool __fastcall LoadTEX(char* szFileName);
-	bool __fastcall LoadJPG(char* szFileName);
-    GLuint ID;
-    char *Name;
-    TTexture *Next;
-    bool HasAlpha;
-    bool HasHash;
-private:
-//    int Width,Height,BPP;
+/*
+//Ra: miejsce umieszczenia tego jest deczko bezsensowne
+void __fastcall glDebug()
+{//logowanie b³êdów OpenGL
+ GLenum err;
+ if (Global::iErorrCounter==326) //tu wpisz o 1 mniej niz wartoœæ, przy której siê wy³o¿y³o
+  Global::iErorrCounter=Global::iErorrCounter+0; //do zastawiania pu³apki przed b³êdnym kodem
+ while ((err=glGetError())!=GL_NO_ERROR) //dalej jest pu³apka po wykonaniu b³êdnego kodu
+  WriteLog("OpenGL error found: "+AnsiString(err)+", step:"+AnsiString(Global::iErorrCounter));
+ ++Global::iErorrCounter;
 };
+*/
 
 class TTexturesManager
 {
 public:
-    __fastcall TTexturesManager() { Init(); };
-    __fastcall ~TTexturesManager();
-    bool __fastcall Free();
-//    __fastcall Init( AnsiString NTexDir ) { TexDir= NTexDir; };
+    static void Init();
+    static void Free();
 
-    static void __fastcall Init() { First= NULL; };
-    static GLuint __fastcall GetTextureID( char *Name, bool dynamic );  //char* Name
-	static GLuint __fastcall GetTextureIDB( char *Name );  //forbumpmap
-    static bool __fastcall GetAlpha( GLuint ID ); //McZapkie-141203: czy tekstura ma polprzeroczystosc 
-//    static bool __fastcall GetHash( GLuint ID );
+    static GLuint GetTextureID(char* dir,char* where,std::string name,int filter=-1);
+    static bool GetAlpha(GLuint ID); //McZapkie-141203: czy tekstura ma polprzeroczystosc
+    static std::string GetName(GLuint id);
+
 private:
-    static GLuint __fastcall LoadFromFile( char* FileName );
-    static TTexture *First;
+    typedef std::pair<GLuint, bool> AlphaValue;
+
+    typedef std::map<std::string, GLuint> Names;
+    typedef std::map<GLuint, bool> Alphas;
+
+    static Names::iterator LoadFromFile(std::string name,int filter=-1);
+
+    static AlphaValue LoadBMP(std::string fileName);
+    static AlphaValue LoadTEX(std::string fileName);
+    static AlphaValue LoadTGA(std::string fileName,int filter=-1);
+    static AlphaValue LoadDDS(std::string fileName,int filter=-1);
+
+    static void SetFiltering(int filter);
+    static void SetFiltering(bool alpha, bool hash);
+    static GLuint CreateTexture(char *buff,GLint bpp,int width,int height,bool bHasAlpha,bool bHash,bool bDollar=true,int filter=-1);
+
+    static Names _names;
+    static Alphas _alphas;
 //    std::list<TTexture> Textures;
 
 };

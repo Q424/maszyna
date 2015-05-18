@@ -252,7 +252,7 @@ inline void Draw_SCENE000(double sx, double sy, double sz)
 {
 	if (Global::bDrawXYGrid)
 	{
-		GLboolean blendEnabled;
+		//GLboolean blendEnabled;
 		GLint blendSrc;
 		GLint blendDst;
 		glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
@@ -261,29 +261,29 @@ inline void Draw_SCENE000(double sx, double sy, double sz)
 		glEnable(GL_BLEND);
 
 		glDisable(GL_LIGHTING);
-		glLineWidth(0.8);
-		glColor4f(0.9, 0.2, 0.2, 0.1);
+		glLineWidth(0.8f);
+		glColor4f(0.9f, 0.2f, 0.2f, 0.1f);
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 10, 0);
-		glVertex3f(0, 0, 0);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(0.0f, 10.0f, 0.0f);
+		glVertex3f(0.0f, 0.0f, 0.0f);
 		glEnd();
-		glColor4f(0.4, 0.9, 0.4, 0.1);
+		glColor4f(0.4f, 0.9f, 0.4f, 0.1f);
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(0, 0, 0);
-		glVertex3f(1000, 0, 0);
-		glVertex3f(0, 0, 0);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(1000.0f, 0.0f, 0.0f);
+		glVertex3f(0.0f, 0.0f, 0.0f);
 		glEnd();
 
-		glColor4f(0.4, 0.4, 0.9, 0.1);
+		glColor4f(0.4f, 0.4f, 0.9f, 0.1f);
 		glBegin(GL_LINE_STRIP);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 0, -1000);
-		glVertex3f(0, 0, 0);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		glVertex3f(0.0f, 0.0f, -1000.0f);
+		glVertex3f(0.0f, 0.0f, 0.0f);
 		glEnd();
 
 		glPushMatrix();
-		glTranslatef(0, 0, 0);
+		glTranslatef(0.0f, 0.0f, 0.0f);
 		//glutSolidSphere(0.3, 12, 12);
 		glPopMatrix();
 
@@ -303,8 +303,8 @@ inline bool DRAW_XYGRID()
 {
 	if (Global::bDrawXYGrid)
 	{
-		float cxx = Global::pCameraPosition.x;
-		float czz = Global::pCameraPosition.z;
+		double cxx = Global::pCameraPosition.x;
+		double czz = Global::pCameraPosition.z;
 		cxx = ceil(Global::pCameraPosition.x / 10) * 10;
 		czz = ceil(Global::pCameraPosition.z / 10) * 10;
 
@@ -320,9 +320,9 @@ inline bool DRAW_XYGRID()
 
 		// if (Global::bGRIDPROAAA) glEnable(GL_BLEND);
 		//glDisable(GL_COLOR_MATERIAL);
-		glLineWidth(0.02);
+		glLineWidth(0.02f);
 		glPushMatrix();
-		glTranslatef(cxx, 0, czz);
+		glTranslatef(float(cxx), 0.0f, float(czz));
 
 		// if (!CBGRIDDT) glDisable(GL_DEPTH_TEST);
 		// if (CBGRIDBLEND)
@@ -330,28 +330,28 @@ inline bool DRAW_XYGRID()
 
 
 
-		glLineWidth(0.01);
-		glColor4f(0.2, 0.2, 0.2, 0.5f);
-		int bound = 100;
+		glLineWidth(0.01f);
+		glColor4f(0.2f, 0.2f, 0.2f, 0.5f);
+		float bound = 100.0f;
 		for (float i = -bound; i <= bound; i += 1)
 		{
 			glBegin(GL_LINES);
-			glVertex3f(-bound, 0, i);
-			glVertex3f(bound, 0, i);
-			glVertex3f(i, 0, -bound);
-			glVertex3f(i, 0, bound);
+			glVertex3f(-bound, 0.0f, i);
+			glVertex3f(bound, 0.0f, i);
+			glVertex3f(i, 0.0f, -bound);
+			glVertex3f(i, 0.0f, bound);
 			glEnd();
 		}
-		glColor4f(0.3, 0.3, 0.3, 0.7f);
-		glLineWidth(0.5);
-		bound = 100;
+		glColor4f(0.3f, 0.3f, 0.3f, 0.7f);
+		glLineWidth(0.5f);
+		bound = 100.0f;
 		for (float i = -bound; i <= bound; i += 10)
 		{
 			glBegin(GL_LINES);
-			glVertex3f(-bound, 0, i);
+			glVertex3f(-bound, 0.0f, i);
 			glVertex3f(bound, 0, i);
-			glVertex3f(i, 0, -bound);
-			glVertex3f(i, 0, bound);
+			glVertex3f(i, 0.0f, -bound);
+			glVertex3f(i, 0.0f, bound);
 			glEnd();
 		}
 
@@ -406,7 +406,7 @@ inline bool CHECKEXTENSIONS()
 
 inline void takeScreenshot(const char* screenshotFile)
 {
-	char SSHOTFILEJPG[256];
+//	char SSHOTFILEJPG[256];
 	char SSHOTFILEPNG[256];
 	char FN[80];
 	std::time_t rawtime;
@@ -419,9 +419,9 @@ inline void takeScreenshot(const char* screenshotFile)
 
 	WriteLog("SAVING SCREEN TO PNG");
 
-	strcpy(SSHOTFILEPNG, "SCREENSHOT//");
+	strcpy_s(SSHOTFILEPNG, "SCREENSHOT//");
 
-	strcat(SSHOTFILEPNG, FN); // =  FDATE + ".bmp";
+	strcat_s(SSHOTFILEPNG, FN); // =  FDATE + ".bmp";
 
 	WriteLog(SSHOTFILEPNG);
 
