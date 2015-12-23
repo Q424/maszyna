@@ -60,14 +60,18 @@ TTexturesManager::Names::iterator TTexturesManager::LoadFromFile(std::string fil
 
     AlphaValue texinfo;
 
+	//WriteLog(ext.c_str());
+	//WriteLog(realFileName.c_str());
+	//WriteLog(Global::asCWD.c_str());
+
     if (ext=="tga")
-     texinfo=LoadTGA(realFileName,filter);
+		texinfo = LoadTGA( realFileName, filter);
     else if (ext=="tex")
-     texinfo=LoadTEX(realFileName);
+		texinfo = LoadTEX( realFileName);
     else if (ext=="bmp")
-     texinfo=LoadBMP(realFileName);
+		texinfo = LoadBMP( realFileName);
     else if (ext=="dds")
-     texinfo=LoadDDS(realFileName,filter);
+		texinfo = LoadDDS( realFileName, filter);
 
     _alphas.insert(texinfo); //zapamiêtanie stanu przezroczystoœci tekstury - mo¿na by tylko przezroczyste
     std::pair<Names::iterator, bool> ret = _names.insert(std::make_pair(fileName, texinfo.first));

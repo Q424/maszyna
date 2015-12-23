@@ -127,6 +127,7 @@ void TTraction::Optimize()
  uiDisplayList=glGenLists(1);
  glNewList(uiDisplayList,GL_COMPILE);
 
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  //Q:
  glBindTexture(GL_TEXTURE_2D, 0);
 //    glColor3ub(0,0,0); McZapkie: to do render
 
@@ -140,6 +141,7 @@ void TTraction::Optimize()
 
       if (Wires==2) WireOffset=0;
       //Przewoz jezdny 1 'Marcin
+	  
       glBegin(GL_LINE_STRIP);
           glVertex3f(pPoint1.x-(pPoint2.z/ddp-pPoint1.z/ddp)*WireOffset,pPoint1.y,pPoint1.z-(-pPoint2.x/ddp+pPoint1.x/ddp)*WireOffset);
           glVertex3f(pPoint2.x-(pPoint2.z/ddp-pPoint1.z/ddp)*WireOffset,pPoint2.y,pPoint2.z-(-pPoint2.x/ddp+pPoint1.x/ddp)*WireOffset);
@@ -297,6 +299,8 @@ void TTraction::RenderDL(float mgn)   //McZapkie: mgn to odleglosc od obserwator
   g*=Global::ambientDayLight[1];
   b*=Global::ambientDayLight[2];
   if (linealpha>1.0) linealpha=1.0; //trzeba ograniczyæ do <=1
+
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  //Q
   glColor4f(r,g,b,linealpha);
   if (!uiDisplayList)
    Optimize(); //generowanie DL w miarê potrzeby

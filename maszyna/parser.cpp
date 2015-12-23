@@ -132,7 +132,7 @@ std::string cParser::readToken(bool ToLower, const char *Break) {
 
   // launch child parser if include directive found.
   // NOTE: parameter collecting uses default set of token separators.
-  SetCurrentDirectory(Global::asCWD.c_str());
+  //SetCurrentDirectory(Global::asCWD.c_str());
 
   if (token.compare("include") == 0) 
   { // obsługa include
@@ -157,7 +157,7 @@ std::string cParser::readToken(bool ToLower, const char *Break) {
       // if (trtest2.find("tr/")!=0)
 
 
-	  if (FileExists(incfile.c_str())) WriteLog("exist"); else WriteLog("missed");
+	  if (FileExists(Global::asCWD + incfile.c_str())) WriteLog("exist"); else WriteLog("missed");
 
 	  
 

@@ -214,8 +214,8 @@ bool  TWorld::Init()
 
 	Global::bfonttex = TTexturesManager::GetTextureID(NULL, NULL, "font.bmp");  // FOR LOADER
 	Global::fonttexturex = TTexturesManager::GetTextureID(NULL, NULL, "font.bmp");
-	Global::loaderbackg = TTexturesManager::GetTextureID(NULL, NULL, "logo.bmp");
-	Global::logotex = TTexturesManager::GetTextureID(NULL, NULL, "logo.bmp");
+	Global::loaderbackg = TTexturesManager::GetTextureID(NULL, NULL, "logo.tga");
+	Global::logotex = TTexturesManager::GetTextureID(NULL, NULL, "logo.tga");
 	Global::boxtex = TTexturesManager::GetTextureID(NULL, NULL, "boxtex.bmp");
 	Global::notex = TTexturesManager::GetTextureID(NULL, NULL, "notex.bmp");
 
@@ -556,9 +556,9 @@ bool  TWorld::Render(double dt, int id)
 	
 	glLightfv(GL_LIGHT0, GL_POSITION, Global::lightPos);
 
-	DRAW_XYGRID();
+	//DRAW_XYGRID();
 
-	Draw_SCENE000(0, 0, 0);
+	//Draw_SCENE000(0, 0, 0);
 	
 	glDisable(GL_FOG);
     Clouds.Render();

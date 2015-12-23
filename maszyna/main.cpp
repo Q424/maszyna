@@ -394,7 +394,7 @@ int main(int argc, TCHAR **argv)
 	SetProcessorAffinity();
 
 	Global::logfilenm1 = "logs\\runlog.log";
-	Global::asCWD = Global::GETCWD();
+	Global::asCWD = Global::GETCWD() + "\\";
 
 	HANDLE myHandle = CreateThread(0, 0, myThread, &myCounter, 0, &myThreadID); 
 
